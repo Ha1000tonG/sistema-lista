@@ -1,48 +1,37 @@
-' UML - Diagrama de Casos de Uso
 @startuml CASO_DE_USO
 
 ' Define o título do diagrama
-title Sistema de Blog
+title API de Gerenciamento de Conteúdos - Diagrama de Casos de Uso
 
-' Define o ator "Autor" à esquerda
+' Define os atores
 left to right direction
-actor "Autor" as autor
-
-' Define o ator "Leitor" à direita
-actor "Leitor" as leitor
+actor "Administrador" as admin
+actor "Visitante" as visitor
 
 ' Define o retângulo que representa o sistema
 rectangle {
-  ' Casos de uso do Autor
-  usecase "Autenticar no Sistema" as UC1
-  usecase "Gerenciar Posts" as UC2
-  usecase "Gerenciar Categorias" as UC3
-  usecase "Moderar Comentários" as UC4
-  usecase "Gerenciar Tags" as UC8
 
-  ' Casos de uso do Leitor
-  usecase "Listar Posts" as UC5
-  usecase "Visualizar Post" as UC6
-  usecase "Adicionar Comentário" as UC7
+  ' Casos de uso do Administrador
+  usecase "Autenticar no Sistema" as UC1
+  usecase "Gerenciar Conteúdo" as UC2
+
+  ' Casos de uso do Visitante
+  usecase "Listar Conteúdos" as UC3
+  usecase "Visualizar um Conteúdo" as UC4
 }
 
 ' Ligações dos atores aos casos de uso
-autor -- UC1
-autor -- UC2
-autor -- UC3
-autor -- UC4
-autor -- UC8
+admin -- UC1
+admin -- UC2
 
-leitor -- UC5
-leitor -- UC6
-leitor -- UC7
+visitor -- UC3
+visitor -- UC4
 
-' Detalhando o caso de uso "Gerenciar Posts" com include
-' "include" significa que um caso de uso sempre inclui o outro
-UC2 .> (Criar Post) : <<include>>
-UC2 .> (Editar Post) : <<include>>
-UC2 .> (Publicar Post) : <<include>>
+' Detalhando o caso de uso "Gerenciar Conteúdo"
+' A relação "include" significa que para gerenciar, é preciso fazer uma dessas ações.
+UC2 .> (Adicionar Conteúdo) : <<include>>
+UC2 .> (Editar Conteúdo) : <<include>>
+UC2 .> (Excluir Conteúdo) : <<include>>
+
 
 @enduml
-
-' para visualizar o diagrama, use alt + D no VS Code com a extensão PlantUML
