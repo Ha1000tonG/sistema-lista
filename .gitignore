@@ -1,0 +1,27 @@
+# Arquivos de ambiente e cache do Python
+/backend/venv/
+/backend/__pycache__/
+*.pyc
+
+# Banco de dados SQLite de desenvolvimento
+# É uma boa prática não versionar o arquivo do banco, pois ele muda constantemente
+/backend/content_api.db
+
+# Arquivos de dependências do Node.js
+# Esta pasta é sempre recriada com 'npm install' e é muito grande
+/frontend/node_modules/
+
+# Arquivos de build e log do front-end
+/frontend/dist/
+/frontend/.DS_Store
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# Arquivos de configuração de editores de código
+.vscode/
+.idea/
+
+# Arquivos de log e sistema operacional geral
+*.log
+.DS_Store
