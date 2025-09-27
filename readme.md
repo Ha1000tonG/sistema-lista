@@ -37,7 +37,7 @@ Para rodar este projeto, você precisará de dois terminais abertos, um para o b
 ### 1. Rodando o Back-end (API)
 
 ```bash
-# A partir da pasta raiz do projeto (ex: sistema-blog/)
+# A partir da pasta raiz do projeto (ex: sistema-lista/)
 cd backend
 
 # Crie e ative o ambiente virtual (se ainda não o fez)

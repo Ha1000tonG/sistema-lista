@@ -1,37 +1,33 @@
-# Documento de Requisitos - Sistema de Blog v1.0
+# Documento de Requisitos - API de Conteúdo "Portfólio" v1.0
 
 ## 1. Introdução
 
-Este documento especifica os requisitos funcionais e não funcionais para a primeira versão (v1.0) do Sistema de Blog. O objetivo do sistema é permitir que autores criem e gerenciem conteúdo (posts) e que leitores visualizem esses posts e interajam através de comentários.
+Este documento especifica os requisitos para a primeira versão (v1.0) de uma API de conteúdo genérica (Headless CMS). O objetivo do sistema é gerenciar "Itens de Conteúdo" de forma flexível, permitindo que diferentes aplicações front-end (como um portfólio, um blog, etc.) possam consumir e exibir esses dados.
 
 ## 2. Atores do Sistema
 
-* **Autor:** Usuário responsável pela criação e gerenciamento dos posts.
-* **Leitor:** Qualquer visitante do blog que consome o conteúdo e pode interagir com ele.
+* **A implementação atual é pública e aberta**
+
+*(Nota: As funcionalidades abaixo descrita na v1.0 do sistema, ainda não não foi implementado).*
+* **Administrador/Autor:** O usuário responsável por gerenciar (criar, editar, excluir) os itens de conteúdo próprio através de uma interface de cliente (front-end).
+* **Visitante:** Qualquer usuário consome o conteúdo exibido pela aplicação cliente, apenas listando e visualizando.
 
 ## 3. Requisitos Funcionais (RF)
 
-Os Requisitos Funcionais descrevem o que o sistema deve fazer.
+| ID    | Nome do Requisito      | Descrição                                                                                                                                                             | Ator Principal |
+| :---- | :--------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------- |
+| RF001 | **(Futuro)** Autenticar Administrador | O Administrador deve poder fazer login no sistema com um usuário e senha para ter acesso exclusivo às funções de gerenciamento.                                     | Administrador  |
+| RF002 | Adicionar Conteúdo     | O sistema deve permitir a criação de um novo item de conteúdo, fornecendo um tipo (ex: 'portfolio_project'), título, descrição e outros campos opcionais.                 | Administrador  |
+| RF003 | Editar Conteúdo        | O sistema deve permitir a edição das informações de um item de conteúdo existente.                                                                                    | Administrador  |
+| RF004 | Excluir Conteúdo       | O sistema deve permitir a remoção de um item de conteúdo do sistema.                                                                                                    | Administrador  |
+| RF005 | Listar Conteúdos       | O sistema deve permitir a visualização de uma lista de todos os itens de conteúdo, com a opção de filtrar por tipo de conteúdo. | Visitante      |
+| RF006 | Visualizar um Conteúdo | O sistema deve permitir a visualização dos detalhes completos de um item de conteúdo específico.                                                                            | Visitante      |
 
-| ID    | Nome do Requisito           | Descrição                                                                                                  | Ator Principal |
-| :---- | :-------------------------- | :--------------------------------------------------------------------------------------------------------- | :------------- |
-| RF001 | Autenticar Autor            | O Autor deve poder fazer login no sistema com um usuário e senha para acessar a área administrativa.         | Autor          |
-| RF002 | Criar Post                  | O Autor, uma vez autenticado, deve poder criar um novo post, fornecendo um título, conteúdo e categoria.    | Autor          |
-| RF003 | Editar Post                 | O Autor deve poder editar o conteúdo, título e categoria de um post que ele mesmo criou.                     | Autor          |
-| RF004 | Publicar Post               | O Autor deve poder alterar o status de um post para "Publicado", tornando-o visível para os Leitores.         | Autor          |
-| RF005 | Gerenciar Categorias        | O Autor deve poder criar, editar e excluir categorias para organizar os posts.                             | Autor          |
-| RF006 | Listar Posts Publicados     | O Leitor deve poder visualizar uma lista de todos os posts publicados na página inicial do blog.              | Leitor         |
-| RF007 | Visualizar Post             | O Leitor deve poder clicar em um post na lista para ver seu conteúdo completo.                                | Leitor         |
-| RF008 | Adicionar Comentário        | O Leitor deve poder adicionar um comentário em um post, fornecendo seu nome e o texto do comentário.        | Leitor         |
-| RF009 | Moderar Comentários         | O Autor deve poder aprovar ou excluir comentários feitos em seus posts.                                      | Autor          |
-| **RF010** | **Gerenciar Tags** | **O Autor deve poder criar e excluir Tags para usar nos posts.** | **Autor** |
 ## 4. Requisitos Não Funcionais (RNF)
 
-Os Requisitos Não Funcionais descrevem como o sistema deve ser (qualidades e restrições).
-
-| ID    | Nome do Requisito | Descrição                                                                                             |
-| :---- | :---------------- | :---------------------------------------------------------------------------------------------------- |
-| RNF001| Usabilidade       | A interface administrativa para o Autor deve ser intuitiva, não exigindo treinamento extensivo.        |
-| RNF002| Desempenho        | A página de listagem de posts deve carregar em menos de 3 segundos com até 1.000 posts no banco de dados. |
-| RNF003| Compatibilidade   | O blog deve ser renderizado corretamente nas versões mais recentes dos navegadores Chrome, Firefox e Safari. |
-| RNF004| Segurança         | A senha do Autor deve ser armazenada no banco de dados de forma criptografada.                          |
+| ID     | Nome do Requisito | Descrição                                                                                                  |
+| :----- | :---------------- | :--------------------------------------------------------------------------------------------------------- |
+| RNF001 | Usabilidade       | A interface de gerenciamento para o Administrador deve ser intuitiva.                                        |
+| RNF002 | Desempenho        | A API deve ser capaz de retornar uma lista de 100 itens em menos de 500ms.                                   |
+| RNF003 | Flexibilidade     | O modelo de dados deve ser genérico o suficiente para suportar diferentes tipos de conteúdo sem alterações na arquitetura base. |
+| RNF004 | Segurança         | O acesso às rotas de criação, edição e exclusão deve ser protegido (funcionalidade futura de autenticação).   |
