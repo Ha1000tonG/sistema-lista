@@ -1,48 +1,35 @@
-' UML - Diagrama de Casos de Uso
-@startuml CASO_DE_USO
+@startuml
 
-' Define o título do diagrama
-title Sistema de Blog
-
-' Define o ator "Autor" à esquerda
+title "Sistema de Portfólio"
+' Define o ator "Administrador" à esquerda
 left to right direction
-actor "Autor" as autor
+actor "Administrador" as admin
 
-' Define o ator "Leitor" à direita
-actor "Leitor" as leitor
+' Define o ator "Visitante" à direita
+actor "Visitante" as visitor
 
 ' Define o retângulo que representa o sistema
 rectangle {
-  ' Casos de uso do Autor
+  ' Casos de uso do Administrador
   usecase "Autenticar no Sistema" as UC1
-  usecase "Gerenciar Posts" as UC2
-  usecase "Gerenciar Categorias" as UC3
-  usecase "Moderar Comentários" as UC4
-  usecase "Gerenciar Tags" as UC8
+  usecase "Gerenciar Projetos" as UC2
 
-  ' Casos de uso do Leitor
-  usecase "Listar Posts" as UC5
-  usecase "Visualizar Post" as UC6
-  usecase "Adicionar Comentário" as UC7
+  ' Casos de uso do Visitante
+  usecase "Listar Projetos" as UC3
+  usecase "Visualizar Projeto" as UC4
 }
 
 ' Ligações dos atores aos casos de uso
-autor -- UC1
-autor -- UC2
-autor -- UC3
-autor -- UC4
-autor -- UC8
+admin -- UC1
+admin -- UC2
 
-leitor -- UC5
-leitor -- UC6
-leitor -- UC7
+visitor -- UC3
+visitor -- UC4
 
-' Detalhando o caso de uso "Gerenciar Posts" com include
+' Detalhando o caso de uso "Gerenciar Projetos" com include
 ' "include" significa que um caso de uso sempre inclui o outro
-UC2 .> (Criar Post) : <<include>>
-UC2 .> (Editar Post) : <<include>>
-UC2 .> (Publicar Post) : <<include>>
+UC2 .> (Adicionar Projeto) : <<include>>
+UC2 .> (Editar Projeto) : <<include>>
+UC2 .> (Excluir Projeto) : <<include>>
 
 @enduml
-
-' para visualizar o diagrama, use alt + D no VS Code com a extensão PlantUML
