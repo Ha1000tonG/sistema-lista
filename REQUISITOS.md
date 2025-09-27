@@ -24,7 +24,7 @@ Os Requisitos Funcionais descrevem o que o sistema deve fazer.
 | RF007 | Visualizar Post             | O Leitor deve poder clicar em um post na lista para ver seu conteúdo completo.                                | Leitor         |
 | RF008 | Adicionar Comentário        | O Leitor deve poder adicionar um comentário em um post, fornecendo seu nome e o texto do comentário.        | Leitor         |
 | RF009 | Moderar Comentários         | O Autor deve poder aprovar ou excluir comentários feitos em seus posts.                                      | Autor          |
-
+| **RF010** | **Gerenciar Tags** | **O Autor deve poder criar e excluir Tags para usar nos posts.** | **Autor** |
 ## 4. Requisitos Não Funcionais (RNF)
 
 Os Requisitos Não Funcionais descrevem como o sistema deve ser (qualidades e restrições).
