@@ -42,6 +42,7 @@ Para rodar este projeto, você precisará de dois terminais abertos, um para o b
 
 # No Windows:
 .\backend\venv\Scripts\activate
+
 # No macOS/Linux:
 source backend/venv/bin/activate
 
@@ -51,8 +52,8 @@ pip install -r backend/requirements.txt
 # Inicie o servidor da API (a partir da raiz)
 uvicorn backend.main:app --reload
 
-
-### 1. Rodando o Frontend
+```
+### 2. Rodando o Frontend
 
 ```bash
 # Em um novo terminal, a partir da pasta raiz do projeto
@@ -63,3 +64,16 @@ npm install
 
 # Inicie o servidor de desenvolvimento
 npm run dev
+
+```
+
+## Endpoints da API
+A API fornece os seguintes endpoints genéricos para o gerenciamento de itens de conteúdo:
+
+| Método | URL                   | Ação                                               |
+| :----- | :-------------------- | :------------------------------------------------- |
+| POST   | `/items/`             | Cria um novo item de conteúdo.                     |
+| GET    | `/items/`             | Lista todos os itens. Aceita `?item_type=` para filtrar. |
+| GET    | `/items/{item_id}`    | Retorna um item específico pelo seu ID.            |
+| PUT    | `/items/{item_id}`    | Atualiza um item existente.                        |
+| DELETE | `/items/{item_id}`    | Exclui um item.                                    |
