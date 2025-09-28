@@ -11,13 +11,13 @@ A aplicação serve como um motor para um portfólio, mas foi projetada para ser
 Este projeto é dividido em duas partes principais: o Back-end e o Front-end.
 
 ### **Back-end (API Genérica)**
-* [cite_start]**Framework:** FastAPI [cite: 1]
-* [cite_start]**Linguagem:** Python 3 [cite: 1]
-* [cite_start]**Banco de Dados:** SQLite [cite: 1]
-* [cite_start]**ORM (Object-Relational Mapper):** SQLAlchemy [cite: 1]
-* [cite_start]**Servidor ASGI:** Uvicorn [cite: 1]
-* [cite_start]**Validação de Dados:** Pydantic [cite: 1]
-* [cite_start]**Gerenciamento de Dependências:** Pip com `requirements.txt` [cite: 1]
+* **Framework:** FastAPI
+* **Linguagem:** Python 3
+* **Banco de Dados:** SQLite
+* **ORM (Object-Relational Mapper):** SQLAlchemy
+* **Servidor ASGI:** Uvicorn
+* **Validação de Dados:** Pydantic
+* **Gerenciamento de Dependências:** Pip com `requirements.txt`
 
 ### **Front-end (Interface de Portfólio)**
 * [cite_start]**Biblioteca:** React 18 [cite: 1]
@@ -41,6 +41,8 @@ Para rodar este projeto, você precisará de dois terminais abertos, um para o b
 # Crie e ative o ambiente virtual (se ainda não o fez)
 # No Windows:
 .\backend\venv\Scripts\activate
+
+---
 # No macOS/Linux:
 source backend/venv/bin/activate
 
@@ -51,14 +53,4 @@ pip install -r backend/requirements.txt
 uvicorn backend.main:app --reload
 
 
-### 1. Rodando o Frontend
-
-```bash
-# Em um novo terminal, a partir da pasta raiz do projeto
-cd frontend
-
-# Instale as dependências (se ainda não o fez)
-npm install
-
-# Inicie o servidor de desenvolvimento
-npm run dev
+---
