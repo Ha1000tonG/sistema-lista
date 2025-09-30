@@ -3,7 +3,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import AdminPage from './pages/AdminPage';
+import AdminPage from './pages/KanbanBoard';
 
 // Componente simples para proteger rotas
 const PrivateRoute = ({ children }) => {

@@ -1,12 +1,18 @@
 # backend/schemas.py
 
-from pydantic import BaseModel
+# Importe ConfigDict para Pydantic v2
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 
 
 class ContentItemBase(BaseModel):
     item_type: str
+
+    # --- CAMPO ADICIONADO ---
+    # O status é opcional ao criar/atualizar, pois já tem um valor padrão no banco.
+    status: Optional[str] = "A Fazer"
+
     title: str
     content: str
     image_url: Optional[str] = None
@@ -24,8 +30,10 @@ class ContentItem(ContentItemBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    # Atualizado para a sintaxe do Pydantic v2 que vimos no log de erro
+    model_config = ConfigDict(from_attributes=True)
+
+# Os schemas User, Token e TokenData permanecem os mesmos
 
 
 class UserBase(BaseModel):
@@ -38,9 +46,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Token(BaseModel):
