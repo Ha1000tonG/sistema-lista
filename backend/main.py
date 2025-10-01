@@ -6,7 +6,7 @@ from .database import engine
 from . import models
 from .routers import items, users, auth
 
-models.Base.metadata.create_all(bind=engine)
+# Cria as tabelas no banco de dados
 app = FastAPI()
 
 origins = ["http://localhost:5173"]
@@ -18,6 +18,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Cria as tabelas no banco de dados (se ainda não existirem) e conecta ao banco de dados SQLite local ou PostgreSQL remoto conforme a configuração do ambiente de execução (variável de ambiente) 
+models.Base.metadata.create_all(bind=engine)
+
+# Inclui os roteadores
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(items.router)
