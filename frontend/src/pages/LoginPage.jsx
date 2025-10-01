@@ -1,7 +1,7 @@
 // frontend/src/pages/LoginPage.jsx
 
-import React, { useState, useEffect } from "react"; // 1. Adicione useEffect
-import axios from "axios";
+import { useState, useEffect } from "react"; // <--- Adicionado useEffect
+import apiClient from '../api/api'; // Sem as chaves
 import {
     Box,
     Heading,
@@ -48,7 +48,7 @@ function LoginPage() {
         params.append("password", password);
 
         try {
-            const response = await axios.post(
+            const response = await apiClient.post(
                 "http://localhost:8000/token",
                 params
             );

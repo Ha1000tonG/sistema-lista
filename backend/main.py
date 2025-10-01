@@ -9,7 +9,8 @@ from .routers import items, users, auth
 # Cria as tabelas no banco de dados
 app = FastAPI()
 
-origins = ["http://localhost:5173"]
+origins = ["http://localhost:5173", # Para desenvolvimento local
+           "https://kanban-hamilton.vercel.app"]  # Para produção
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -18,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Cria as tabelas no banco de dados (se ainda não existirem) e conecta ao banco de dados SQLite local ou PostgreSQL remoto conforme a configuração do ambiente de execução (variável de ambiente) 
+# Cria as tabelas no banco de dados (se ainda não existirem) e conecta ao banco de dados SQLite local ou PostgreSQL remoto conforme a configuração do ambiente de execução (variável de ambiente)
 models.Base.metadata.create_all(bind=engine)
 
 # Inclui os roteadores

@@ -1,7 +1,7 @@
 // frontend/src/pages/KanbanBoard.jsx
 
-import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import apiClient from "../api/api";
 import {
     Container,
     Box,
@@ -31,7 +31,6 @@ import {
     Spacer,
 } from "@chakra-ui/react";
 import { FaTrash } from "react-icons/fa";
-
 import {
     DndContext,
     PointerSensor,
@@ -48,36 +47,6 @@ import {
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-
-const apiClient = axios.create({
-    baseURL: "https://kanban-api-uzsd.onrender.com",
-});
-
-apiClient.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem("access_token");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
-
-apiClient.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response && error.response.status === 401) {
-            localStorage.setItem(
-                "logout_message",
-                "Sua sessão expirou. Por favor, faça o login novamente."
-            );
-            localStorage.removeItem("access_token");
-            window.location.href = "/login";
-        }
-        return Promise.reject(error);
-    }
-);
 
 const statusColorMap = {
     "A Fazer": "gray",
@@ -116,7 +85,6 @@ const Card = ({ task, onDelete, onEdit, dragAttributes, dragListeners }) => (
         >
             {task.content}
         </Text>
-
         {task.tags && (
             <HStack mt={4} spacing={2}>
                 {task.tags.split(",").map(
@@ -129,7 +97,6 @@ const Card = ({ task, onDelete, onEdit, dragAttributes, dragListeners }) => (
                 )}
             </HStack>
         )}
-
         <HStack justify="space-between" mt={4} align="center">
             {task.owner && (
                 <HStack spacing={2} align="center">
@@ -139,7 +106,6 @@ const Card = ({ task, onDelete, onEdit, dragAttributes, dragListeners }) => (
                     </Text>
                 </HStack>
             )}
-
             <HStack spacing={2}>
                 <Button
                     colorScheme="blue"
@@ -269,22 +235,17 @@ function KanbanBoard() {
         window.location.href = "/login";
     };
 
-    // Apenas a lógica do useEffect foi refeita para ser mais robusta
     useEffect(() => {
         const loadPageData = async () => {
             const token = localStorage.getItem("access_token");
-            if (!token) {
-                return;
-            }
-
+            if (!token) return;
             try {
                 const [userResponse, tasksResponse] = await Promise.all([
                     apiClient.get("/users/me/"),
-                    axios.get("http://localhost:8000/items/", {
+                    apiClient.get("/items/", {
                         params: { item_type: ITEM_TYPE },
                     }),
                 ]);
-
                 setCurrentUser(userResponse.data);
                 setTasks(tasksResponse.data);
             } catch (error) {
@@ -292,16 +253,26 @@ function KanbanBoard() {
                     console.error("Erro ao carregar dados da página:", error);
                     toast({
                         title: "Erro ao carregar o quadro.",
-                        description:
-                            "Não foi possível buscar os dados do servidor.",
                         status: "error",
                     });
                 }
             }
         };
-
         loadPageData();
     }, [toast]);
+
+    const fetchTasks = async () => {
+        try {
+            const response = await apiClient.get("/items/", {
+                params: { item_type: ITEM_TYPE },
+            });
+            setTasks(response.data);
+        } catch (error) {
+            if (error.response?.status !== 401) {
+                console.error("Erro ao buscar as tarefas:", error);
+            }
+        }
+    };
 
     const handleCreateTask = async (event) => {
         event.preventDefault();
@@ -312,17 +283,8 @@ function KanbanBoard() {
                 status: "A Fazer",
             };
             await apiClient.post("/items/", dataToSend);
-            toast({
-                title: "Tarefa criada com sucesso!",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
-            // Re-executa a busca para garantir consistência
-            const response = await axios.get("http://localhost:8000/items/", {
-                params: { item_type: ITEM_TYPE },
-            });
-            setTasks(response.data);
+            toast({ title: "Tarefa criada com sucesso!", status: "success" });
+            fetchTasks();
             onCreateClose();
             setNewItem({ title: "", content: "", tags: "" });
         } catch (error) {
@@ -340,14 +302,8 @@ function KanbanBoard() {
                 toast({
                     title: "Tarefa excluída com sucesso!",
                     status: "success",
-                    duration: 2000,
-                    isClosable: true,
                 });
-                const response = await axios.get(
-                    "http://localhost:8000/items/",
-                    { params: { item_type: ITEM_TYPE } }
-                );
-                setTasks(response.data);
+                fetchTasks();
             } catch (error) {
                 if (error.response && error.response.status === 403) {
                     toast({
@@ -381,39 +337,50 @@ function KanbanBoard() {
         setEditingTask((prevState) => ({ ...prevState, [name]: value }));
     };
 
-    const handleUpdateTask = async (event) => {
-        event.preventDefault();
-        try {
-            const { id, owner, created_at, updated_at, ...dataToUpdate } =
-                editingTask;
-            await apiClient.put(`/items/${id}`, dataToUpdate);
+const handleUpdateTask = async (event) => {
+    event.preventDefault();
+    try {
+        // 1. Pegamos o ID para usar na URL.
+        const { id } = editingTask;
+
+        // 2. Criamos o objeto de dados para enviar, omitindo os campos que não queremos.
+        const dataToUpdate = {
+            title: editingTask.title,
+            content: editingTask.content,
+            tags: editingTask.tags,
+            item_type: editingTask.item_type,
+            status: editingTask.status,
+            image_url: editingTask.image_url,
+            link_1_url: editingTask.link_1_url,
+            link_1_text: editingTask.link_1_text,
+        };
+
+        await apiClient.put(`/items/${id}`, dataToUpdate);
+
+        toast({
+            title: "Tarefa atualizada com sucesso!",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+        });
+        fetchTasks();
+        onEditClose();
+    } catch (error) {
+        if (error.response && error.response.status === 403) {
             toast({
-                title: "Tarefa atualizada com sucesso!",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
+                title: "Acesso Negado",
+                description: "Apenas o autor do cartão pode editá-lo.",
+                status: "error",
             });
-            const response = await axios.get("http://localhost:8000/items/", {
-                params: { item_type: ITEM_TYPE },
+        } else if (error.response?.status !== 401) {
+            console.error("Erro ao atualizar tarefa:", error);
+            toast({
+                title: "Erro ao atualizar a tarefa.",
+                status: "error",
             });
-            setTasks(response.data);
-            onEditClose();
-        } catch (error) {
-            if (error.response && error.response.status === 403) {
-                toast({
-                    title: "Acesso Negado",
-                    description: "Apenas o autor do cartão pode editá-lo.",
-                    status: "error",
-                });
-            } else if (error.response?.status !== 401) {
-                console.error("Erro ao atualizar tarefa:", error);
-                toast({
-                    title: "Erro ao atualizar a tarefa.",
-                    status: "error",
-                });
-            }
         }
-    };
+    }
+};
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -426,7 +393,6 @@ function KanbanBoard() {
         setActiveTask(task);
     };
 
-    // A LÓGICA DE DRAG AND DROP RESTAURADA
     const handleDragEnd = (event) => {
         setActiveTask(null);
         const { active, over } = event;
@@ -450,15 +416,22 @@ function KanbanBoard() {
                 t.id === active.id ? { ...t, status: newStatus } : t
             )
         );
-        const { id, owner, created_at, updated_at, ...taskData } = activeTask;
-        const payload = { ...taskData, status: newStatus };
+        const payload = {
+            title: activeTask.title,
+            content: activeTask.content,
+            tags: activeTask.tags,
+            item_type: activeTask.item_type,
+            status: newStatus, // Usa o novo status
+            image_url: activeTask.image_url,
+            link_1_url: activeTask.link_1_url,
+            link_1_text: activeTask.link_1_text,
+        };
         apiClient
             .put(`/items/${active.id}`, payload)
             .then(() => {
                 toast({
                     title: `Tarefa movida para "${newStatus}"!`,
                     status: "success",
-                    duration: 2000,
                 });
             })
             .catch((error) => {
@@ -469,10 +442,6 @@ function KanbanBoard() {
                         status: "error",
                     });
                 } else if (error.response?.status !== 401) {
-                    console.error(
-                        "Erro ao atualizar o status:",
-                        error.response ? error.response.data : error.message
-                    );
                     toast({
                         title: "Falha ao mover a tarefa.",
                         status: "error",
@@ -520,7 +489,6 @@ function KanbanBoard() {
                     </Button>
                 </HStack>
             </HStack>
-
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}
@@ -557,7 +525,6 @@ function KanbanBoard() {
                     {activeTask ? <Card task={activeTask} /> : null}
                 </DragOverlay>
             </DndContext>
-
             <Modal isOpen={isCreateOpen} onClose={onCreateClose}>
                 <ModalOverlay />
                 <ModalContent as="form" onSubmit={handleCreateTask}>
@@ -644,7 +611,7 @@ function KanbanBoard() {
                 </Modal>
             )}
         </Container>
-    );
+    ) // <-- O PONTO E VÍRGULA FOI REMOVIDO DAQUI
 }
 
 export default KanbanBoard;

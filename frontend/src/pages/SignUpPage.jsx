@@ -1,7 +1,8 @@
 // frontend/src/pages/SignUpPage.jsx
 
-import React, { useState } from "react";
-import axios from "axios";
+import { useState } from "react"; // <--- Adicionado useState
+import apiClient from '../api/api'; // Sem as chaves
+//import axios from "axios";
 import {
     Box,
     Heading,
@@ -27,7 +28,7 @@ function SignUpPage() {
         event.preventDefault();
 
         try {
-            await axios.post("http://localhost:8000/users/", {
+            await apiClient.post("http://localhost:8000/users/", {
                 username: username,
                 password: password,
             });
