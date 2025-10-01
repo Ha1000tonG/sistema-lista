@@ -6,10 +6,11 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
 from . import schemas, database, models
+from .config import settings  # <-- Importe 'settings'
 
-SECRET_KEY = "SUA_CHAVE_SECRETA_MUITO_LONGA_E_SEGURA"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

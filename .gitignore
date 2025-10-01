@@ -3,6 +3,9 @@
 /backend/__pycache__/
 *.pyc
 
+# Arquivo de variáveis de ambiente
+.env
+
 # Banco de dados SQLite de desenvolvimento
 # É uma boa prática não versionar o arquivo do banco, pois ele muda constantemente
 /backend/content_api.db
