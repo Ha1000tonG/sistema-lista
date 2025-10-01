@@ -27,6 +27,8 @@ import {
     Grid,
     GridItem,
     IconButton,
+    Avatar,
+    Spacer, // <-- ADICIONADO PARA O LAYOUT DO CABEÇALHO
 } from "@chakra-ui/react";
 import { FaTrash } from "react-icons/fa";
 
@@ -48,6 +50,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 const apiClient = axios.create({ baseURL: "http://localhost:8000" });
+
 apiClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("access_token");
@@ -58,6 +61,7 @@ apiClient.interceptors.request.use(
     },
     (error) => Promise.reject(error)
 );
+
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -76,10 +80,10 @@ apiClient.interceptors.response.use(
 const statusColorMap = {
     "A Fazer": "gray",
     "Em Andamento": "blue",
-    Concluído: "green",
+    "Concluído": "green",
 };
 
-const Card = ({ task, onDelete, dragAttributes, dragListeners }) => (
+const Card = ({ task, onDelete, onEdit, dragAttributes, dragListeners }) => (
     <Box
         p={3}
         borderWidth="1px"
@@ -124,31 +128,49 @@ const Card = ({ task, onDelete, dragAttributes, dragListeners }) => (
             </HStack>
         )}
 
-        <HStack justify="space-between" mt={3}>
-            <IconButton
-                aria-label="Excluir tarefa"
-                icon={<FaTrash />}
-                size="sm"
-                colorScheme="red"
-                variant="ghost"
-                onClick={onDelete}
-            />
-            <Box
-                {...dragAttributes}
-                {...dragListeners}
-                cursor="grab"
-                px={2}
-                py={1}
-            >
-                <Text as="span" fontSize="lg" color="gray.400">
-                    ⋮⋮
-                </Text>
-            </Box>
+        <HStack justify="space-between" mt={4} align="center">
+            {task.owner && (
+                <HStack spacing={2} align="center">
+                    <Avatar name={task.owner.username} size="xs" />
+                    <Text fontSize="xs" color="gray.500">
+                        {task.owner.username}
+                    </Text>
+                </HStack>
+            )}
+
+            <HStack spacing={2}>
+                <Button
+                    colorScheme="blue"
+                    size="xs"
+                    variant="ghost"
+                    onClick={onEdit}
+                >
+                    Editar
+                </Button>
+                <IconButton
+                    aria-label="Excluir tarefa"
+                    icon={<FaTrash />}
+                    size="sm"
+                    colorScheme="red"
+                    variant="ghost"
+                    onClick={onDelete}
+                />
+                <Box
+                    {...dragAttributes}
+                    {...dragListeners}
+                    cursor="grab"
+                    px={1}
+                >
+                    <Text as="span" fontSize="lg" color="gray.400">
+                        ⋮⋮
+                    </Text>
+                </Box>
+            </HStack>
         </HStack>
     </Box>
 );
 
-const SortableCard = ({ task, onDelete }) => {
+const SortableCard = ({ task, onDelete, onEdit }) => {
     const {
         attributes,
         listeners,
@@ -162,12 +184,12 @@ const SortableCard = ({ task, onDelete }) => {
         transition,
         opacity: isDragging ? 0.5 : 1,
     };
-
     return (
         <div ref={setNodeRef} style={style}>
             <Card
                 task={task}
                 onDelete={onDelete}
+                onEdit={onEdit}
                 dragAttributes={attributes}
                 dragListeners={listeners}
             />
@@ -175,7 +197,7 @@ const SortableCard = ({ task, onDelete }) => {
     );
 };
 
-const Column = ({ title, tasks, onDelete }) => {
+const Column = ({ title, tasks, onDelete, onEdit }) => {
     const { setNodeRef } = useSortable({
         id: title,
         data: { type: "Column", items: tasks },
@@ -208,6 +230,7 @@ const Column = ({ title, tasks, onDelete }) => {
                             key={task.id}
                             task={task}
                             onDelete={() => onDelete(task.id)}
+                            onEdit={() => onEdit(task)}
                         />
                     ))}
                 </VStack>
@@ -219,12 +242,26 @@ const Column = ({ title, tasks, onDelete }) => {
 function KanbanBoard() {
     const [tasks, setTasks] = useState([]);
     const [activeTask, setActiveTask] = useState(null);
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const {
+        isOpen: isCreateOpen,
+        onOpen: onCreateOpen,
+        onClose: onCreateClose,
+    } = useDisclosure();
     const [newItem, setNewItem] = useState({
         title: "",
         content: "",
         tags: "",
     });
+    const {
+        isOpen: isEditOpen,
+        onOpen: onEditOpen,
+        onClose: onEditClose,
+    } = useDisclosure();
+    const [editingTask, setEditingTask] = useState(null);
+
+    // --- ADIÇÃO: Novo estado para o usuário logado ---
+    const [currentUser, setCurrentUser] = useState(null);
+
     const toast = useToast();
     const ITEM_TYPE = "kanban_card";
 
@@ -232,6 +269,7 @@ function KanbanBoard() {
         localStorage.removeItem("access_token");
         window.location.href = "/login";
     };
+
     const fetchTasks = useCallback(async () => {
         try {
             const response = await axios.get("http://localhost:8000/items/", {
@@ -245,9 +283,24 @@ function KanbanBoard() {
             }
         }
     }, [toast]);
+
+    // --- ADIÇÃO: useEffect foi modificado para buscar o usuário ---
     useEffect(() => {
         fetchTasks();
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await apiClient.get("/users/me/");
+                setCurrentUser(response.data);
+            } catch (error) {
+                console.error(
+                    "Não foi possível buscar os dados do usuário.",
+                    error
+                );
+            }
+        };
+        fetchCurrentUser();
     }, [fetchTasks]);
+
     const handleCreateTask = async (event) => {
         event.preventDefault();
         try {
@@ -264,20 +317,16 @@ function KanbanBoard() {
                 isClosable: true,
             });
             fetchTasks();
-            onClose();
+            onCreateClose();
             setNewItem({ title: "", content: "", tags: "" });
         } catch (error) {
             if (error.response?.status !== 401) {
                 console.error("Erro ao criar tarefa:", error);
-                toast({
-                    title: "Erro ao criar a tarefa.",
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                });
+                toast({ title: "Erro ao criar a tarefa.", status: "error" });
             }
         }
     };
+
     const handleDeleteItem = async (itemId) => {
         if (window.confirm("Tem certeza que deseja excluir esta tarefa?")) {
             try {
@@ -290,29 +339,80 @@ function KanbanBoard() {
                 });
                 fetchTasks();
             } catch (error) {
-                if (error.response?.status !== 401) {
-                    console.error("Erro ao excluir a tarefa:", error);
+                if (error.response && error.response.status === 403) {
+                    toast({
+                        title: "Acesso Negado",
+                        description: "Apenas o autor do cartão pode excluí-lo.",
+                        status: "error",
+                    });
+                } else if (error.response?.status !== 401) {
                     toast({
                         title: "Erro ao excluir a tarefa.",
                         status: "error",
                     });
                 }
+                console.error("Erro ao excluir a tarefa:", error);
             }
         }
     };
+
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         setNewItem((prevState) => ({ ...prevState, [name]: value }));
     };
+
+    const handleEditClick = (task) => {
+        setEditingTask(task);
+        onEditOpen();
+    };
+
+    const handleEditFormChange = (e) => {
+        const { name, value } = e.target;
+        setEditingTask((prevState) => ({ ...prevState, [name]: value }));
+    };
+
+    const handleUpdateTask = async (event) => {
+        event.preventDefault();
+        try {
+            const { id, owner, created_at, updated_at, ...dataToUpdate } =
+                editingTask;
+            await apiClient.put(`/items/${id}`, dataToUpdate);
+            toast({
+                title: "Tarefa atualizada com sucesso!",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+            fetchTasks();
+            onEditClose();
+        } catch (error) {
+            if (error.response && error.response.status === 403) {
+                toast({
+                    title: "Acesso Negado",
+                    description: "Apenas o autor do cartão pode editá-lo.",
+                    status: "error",
+                });
+            } else if (error.response?.status !== 401) {
+                console.error("Erro ao atualizar tarefa:", error);
+                toast({
+                    title: "Erro ao atualizar a tarefa.",
+                    status: "error",
+                });
+            }
+        }
+    };
+
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
         useSensor(KeyboardSensor)
     );
+
     const handleDragStart = (event) => {
         const { active } = event;
         const task = tasks.find((t) => t.id === active.id);
         setActiveTask(task);
     };
+
     const handleDragEnd = (event) => {
         setActiveTask(null);
         const { active, over } = event;
@@ -336,8 +436,10 @@ function KanbanBoard() {
                 t.id === active.id ? { ...t, status: newStatus } : t
             )
         );
+        const { id, owner, created_at, updated_at, ...taskData } = activeTask;
+        const payload = { ...taskData, status: newStatus };
         apiClient
-            .put(`/items/${active.id}`, { ...activeTask, status: newStatus })
+            .put(`/items/${active.id}`, payload)
             .then(() => {
                 toast({
                     title: `Tarefa movida para "${newStatus}"!`,
@@ -346,7 +448,13 @@ function KanbanBoard() {
                 });
             })
             .catch((error) => {
-                if (error.response?.status !== 401) {
+                if (error.response && error.response.status === 403) {
+                    toast({
+                        title: "Acesso Negado",
+                        description: "Apenas o autor do cartão pode movê-lo.",
+                        status: "error",
+                    });
+                } else if (error.response?.status !== 401) {
                     console.error(
                         "Erro ao atualizar o status:",
                         error.response ? error.response.data : error.message
@@ -355,14 +463,14 @@ function KanbanBoard() {
                         title: "Falha ao mover a tarefa.",
                         status: "error",
                     });
-                    setTasks((prevTasks) =>
-                        prevTasks.map((t) =>
-                            t.id === active.id
-                                ? { ...t, status: originalStatus }
-                                : t
-                        )
-                    );
                 }
+                setTasks((prevTasks) =>
+                    prevTasks.map((t) =>
+                        t.id === active.id
+                            ? { ...t, status: originalStatus }
+                            : t
+                    )
+                );
             });
     };
 
@@ -374,12 +482,27 @@ function KanbanBoard() {
 
     return (
         <Container maxW="container.fluid" p={5}>
-            <HStack justifyContent="space-between" mb={8}>
-                <Heading as="h1" size="xl">
-                    Quadro Kanban
-                </Heading>
+            {/* --- ADIÇÃO: O cabeçalho foi reestruturado --- */}
+            <HStack justifyContent="space-between" mb={8} w="100%">
+                {/* Agrupando os itens da esquerda */}
+                <HStack spacing={4} align="center">
+                    <Heading as="h1" size="xl">
+                        Quadro Kanban
+                    </Heading>
+                    {currentUser && (
+                        <HStack p={2} borderRadius="md">
+                            <Avatar name={currentUser.username} size="sm" />
+                            <Text fontWeight="medium">
+                                {currentUser.username}
+                            </Text>
+                        </HStack>
+                    )}
+                </HStack>
+                <Spacer />{" "}
+                {/* O Spacer agora empurra apenas os botões para a direita */}
+                {/* Agrupando os itens da direita */}
                 <HStack>
-                    <Button colorScheme="green" onClick={onOpen}>
+                    <Button colorScheme="green" onClick={onCreateOpen}>
                         Adicionar Tarefa
                     </Button>
                     <Button colorScheme="red" onClick={handleLogout}>
@@ -387,6 +510,7 @@ function KanbanBoard() {
                     </Button>
                 </HStack>
             </HStack>
+
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}
@@ -399,6 +523,7 @@ function KanbanBoard() {
                             title="A Fazer"
                             tasks={todoTasks}
                             onDelete={handleDeleteItem}
+                            onEdit={handleEditClick}
                         />
                     </GridItem>
                     <GridItem>
@@ -406,6 +531,7 @@ function KanbanBoard() {
                             title="Em Andamento"
                             tasks={inProgressTasks}
                             onDelete={handleDeleteItem}
+                            onEdit={handleEditClick}
                         />
                     </GridItem>
                     <GridItem>
@@ -413,6 +539,7 @@ function KanbanBoard() {
                             title="Concluído"
                             tasks={doneTasks}
                             onDelete={handleDeleteItem}
+                            onEdit={handleEditClick}
                         />
                     </GridItem>
                 </Grid>
@@ -420,7 +547,7 @@ function KanbanBoard() {
                     {activeTask ? <Card task={activeTask} /> : null}
                 </DragOverlay>
             </DndContext>
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal isOpen={isCreateOpen} onClose={onCreateClose}>
                 <ModalOverlay />
                 <ModalContent as="form" onSubmit={handleCreateTask}>
                     <ModalHeader>Criar Nova Tarefa</ModalHeader>
@@ -458,10 +585,53 @@ function KanbanBoard() {
                         <Button type="submit" colorScheme="blue" mr={3}>
                             Salvar
                         </Button>
-                        <Button onClick={onClose}>Cancelar</Button>
+                        <Button onClick={onCreateClose}>Cancelar</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>
+            {editingTask && (
+                <Modal isOpen={isEditOpen} onClose={onEditClose}>
+                    <ModalOverlay />
+                    <ModalContent as="form" onSubmit={handleUpdateTask}>
+                        <ModalHeader>Editar Tarefa</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody pb={6}>
+                            <VStack spacing={4}>
+                                <FormControl isRequired>
+                                    <FormLabel>Título</FormLabel>
+                                    <Input
+                                        name="title"
+                                        value={editingTask.title}
+                                        onChange={handleEditFormChange}
+                                    />
+                                </FormControl>
+                                <FormControl>
+                                    <FormLabel>Descrição</FormLabel>
+                                    <Textarea
+                                        name="content"
+                                        value={editingTask.content}
+                                        onChange={handleEditFormChange}
+                                    />
+                                </FormControl>
+                                <FormControl>
+                                    <FormLabel>Tags</FormLabel>
+                                    <Input
+                                        name="tags"
+                                        value={editingTask.tags || ""}
+                                        onChange={handleEditFormChange}
+                                    />
+                                </FormControl>
+                            </VStack>
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button type="submit" colorScheme="blue" mr={3}>
+                                Salvar Alterações
+                            </Button>
+                            <Button onClick={onEditClose}>Cancelar</Button>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+            )}
         </Container>
     );
 }

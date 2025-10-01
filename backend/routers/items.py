@@ -39,9 +39,15 @@ def read_item(item_id: int, db: Session = Depends(database.get_db)):
 def update_item(item_id: int, item_update: schemas.ContentItemCreate, db: Session = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
     db_item = db.query(models.ContentItem).filter(
         models.ContentItem.id == item_id).first()
+
     if db_item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Item não encontrado")
+    # --- VERIFICAÇÃO DE POSSE ADICIONADA ---
+    if db_item.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Não tem permissão para editar este item")
+
     update_data = item_update.dict(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_item, key, value)
@@ -49,7 +55,7 @@ def update_item(item_id: int, item_update: schemas.ContentItemCreate, db: Sessio
     db.refresh(db_item)
     return db_item
 
-
+# --- ROTA DELETAR ITEM COM VERIFICAÇÃO DE POSSE ADICIONADA  ---
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_item(item_id: int, db: Session = Depends(database.get_db), current_user: schemas.User = Depends(auth.get_current_user)):
     db_item = db.query(models.ContentItem).filter(
@@ -57,6 +63,12 @@ def delete_item(item_id: int, db: Session = Depends(database.get_db), current_us
     if db_item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Item não encontrado")
+
+    # --- VERIFICAÇÃO DE POSSE ADICIONADA ---
+    if db_item.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Não tem permissão para excluir este item")
+
     db.delete(db_item)
     db.commit()
     return

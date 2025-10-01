@@ -15,3 +15,12 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)
     db.commit()
     db.refresh(db_user)
     return db_user
+
+# --- ENDPOINT ADICIONADO ---
+# Este endpoint retorna os dados do usuário que está logado.
+@router.get("/me/", response_model=schemas.User)
+def read_users_me(current_user: schemas.User = Depends(auth.get_current_user)):
+    """
+    Retorna os dados do usuário atualmente autenticado.
+    """
+    return current_user
