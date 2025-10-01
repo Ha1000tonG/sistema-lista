@@ -12,7 +12,10 @@ import {
     VStack,
     useToast,
     Container,
+    Text, // <--- Adicionado
+    Link as ChakraLink, // <--- Adicionado
 } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 
 function LoginPage() {
     const [username, setUsername] = useState("");
@@ -103,6 +106,12 @@ function LoginPage() {
                         Entrar
                     </Button>
                 </VStack>
+                    <Text mt={6} textAlign="center">
+                    Caso não esteja cadastrado,{' '}
+                    <ChakraLink as={RouterLink} to="/signup" color="blue.400">
+                        clique aqui.
+                    </ChakraLink>
+        </Text>
             </Box>
         </Container>
     );

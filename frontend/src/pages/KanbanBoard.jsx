@@ -26,7 +26,9 @@ import {
     Tag,
     Grid,
     GridItem,
+    IconButton,
 } from "@chakra-ui/react";
+import { FaTrash } from "react-icons/fa";
 
 import {
     DndContext,
@@ -77,41 +79,76 @@ const statusColorMap = {
     Concluído: "green",
 };
 
-// frontend/src/pages/KanbanBoard.jsx
-
-// (Encontre esta definição de componente no seu arquivo)
-
-const Card = ({ task }) => (
-    <Box p={3} borderWidth="1px" borderRadius="md" boxShadow="sm" bg="white" _dark={{ bg: "gray.800" }}>
+const Card = ({ task, onDelete, dragAttributes, dragListeners }) => (
+    <Box
+        p={3}
+        borderWidth="1px"
+        borderRadius="md"
+        boxShadow="sm"
+        bg="white"
+        _dark={{ bg: "gray.800" }}
+    >
         <HStack justify="space-between" align="flex-start">
-            <Text fontWeight="bold" flex="1" mr={2}>{task.title}</Text>
+            <Text fontWeight="bold" flex="1" mr={2}>
+                {task.title}
+            </Text>
             {task.status && (
-                <Tag size="sm" variant="solid" colorScheme={statusColorMap[task.status] || 'gray'}>
+                <Tag
+                    size="sm"
+                    variant="solid"
+                    colorScheme={statusColorMap[task.status] || "gray"}
+                >
                     {task.status}
                 </Tag>
             )}
         </HStack>
-        <Text fontSize="sm" mt={2} color="gray.600" _dark={{ color: "gray.400" }}>{task.content}</Text>
+        <Text
+            fontSize="sm"
+            mt={2}
+            color="gray.600"
+            _dark={{ color: "gray.400" }}
+        >
+            {task.content}
+        </Text>
 
-        {/* --- BLOCO DE CÓDIGO PARA RENDERIZAR AS TAGS --- */}
-        {/* Adicionamos uma verificação 'task.tags &&' para segurança */}
         {task.tags && (
             <HStack mt={4} spacing={2}>
-              {/* Quebra a string de tags pela vírgula e cria um componente Tag para cada uma */}
-              {task.tags.split(',').map(tag =>
-                  tag.trim() && (
-                      <Tag key={tag} size="sm" colorScheme="purple">
-                          {tag.trim()}
-                      </Tag>
-                  )
-              )}
+                {task.tags.split(",").map(
+                    (tag) =>
+                        tag.trim() && (
+                            <Tag key={tag} size="sm" colorScheme="purple">
+                                {tag.trim()}
+                            </Tag>
+                        )
+                )}
             </HStack>
         )}
-        {/* ------------------------------------------- */}
+
+        <HStack justify="space-between" mt={3}>
+            <IconButton
+                aria-label="Excluir tarefa"
+                icon={<FaTrash />}
+                size="sm"
+                colorScheme="red"
+                variant="ghost"
+                onClick={onDelete}
+            />
+            <Box
+                {...dragAttributes}
+                {...dragListeners}
+                cursor="grab"
+                px={2}
+                py={1}
+            >
+                <Text as="span" fontSize="lg" color="gray.400">
+                    ⋮⋮
+                </Text>
+            </Box>
+        </HStack>
     </Box>
 );
 
-const SortableCard = ({ task }) => {
+const SortableCard = ({ task, onDelete }) => {
     const {
         attributes,
         listeners,
@@ -125,16 +162,20 @@ const SortableCard = ({ task }) => {
         transition,
         opacity: isDragging ? 0.5 : 1,
     };
+
     return (
         <div ref={setNodeRef} style={style}>
-            <Box {...attributes} {...listeners} cursor="grab">
-                <Card task={task} />
-            </Box>
+            <Card
+                task={task}
+                onDelete={onDelete}
+                dragAttributes={attributes}
+                dragListeners={listeners}
+            />
         </div>
     );
 };
 
-const Column = ({ title, tasks }) => {
+const Column = ({ title, tasks, onDelete }) => {
     const { setNodeRef } = useSortable({
         id: title,
         data: { type: "Column", items: tasks },
@@ -163,7 +204,11 @@ const Column = ({ title, tasks }) => {
                     p={1}
                 >
                     {tasks.map((task) => (
-                        <SortableCard key={task.id} task={task} />
+                        <SortableCard
+                            key={task.id}
+                            task={task}
+                            onDelete={() => onDelete(task.id)}
+                        />
                     ))}
                 </VStack>
             </SortableContext>
@@ -187,7 +232,6 @@ function KanbanBoard() {
         localStorage.removeItem("access_token");
         window.location.href = "/login";
     };
-
     const fetchTasks = useCallback(async () => {
         try {
             const response = await axios.get("http://localhost:8000/items/", {
@@ -201,11 +245,9 @@ function KanbanBoard() {
             }
         }
     }, [toast]);
-
     useEffect(() => {
         fetchTasks();
     }, [fetchTasks]);
-
     const handleCreateTask = async (event) => {
         event.preventDefault();
         try {
@@ -225,45 +267,61 @@ function KanbanBoard() {
             onClose();
             setNewItem({ title: "", content: "", tags: "" });
         } catch (error) {
-            console.error("Erro ao criar tarefa:", error);
-            toast({
-                title: "Erro ao criar a tarefa.",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            if (error.response?.status !== 401) {
+                console.error("Erro ao criar tarefa:", error);
+                toast({
+                    title: "Erro ao criar a tarefa.",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
         }
     };
-
+    const handleDeleteItem = async (itemId) => {
+        if (window.confirm("Tem certeza que deseja excluir esta tarefa?")) {
+            try {
+                await apiClient.delete(`/items/${itemId}`);
+                toast({
+                    title: "Tarefa excluída com sucesso!",
+                    status: "success",
+                    duration: 2000,
+                    isClosable: true,
+                });
+                fetchTasks();
+            } catch (error) {
+                if (error.response?.status !== 401) {
+                    console.error("Erro ao excluir a tarefa:", error);
+                    toast({
+                        title: "Erro ao excluir a tarefa.",
+                        status: "error",
+                    });
+                }
+            }
+        }
+    };
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         setNewItem((prevState) => ({ ...prevState, [name]: value }));
     };
-
     const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: { distance: 8 },
-        }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
         useSensor(KeyboardSensor)
     );
-
     const handleDragStart = (event) => {
         const { active } = event;
         const task = tasks.find((t) => t.id === active.id);
         setActiveTask(task);
     };
-
     const handleDragEnd = (event) => {
         setActiveTask(null);
         const { active, over } = event;
         if (!over || active.id === over.id) return;
-
         const activeTask = tasks.find((t) => t.id === active.id);
         const overIsColumn = over.data.current?.type === "Column";
         const newStatus = overIsColumn
             ? over.id
             : tasks.find((t) => t.id === over.id)?.status;
-
         if (!newStatus || activeTask.status === newStatus) {
             const activeIndex = tasks.findIndex((t) => t.id === active.id);
             const overIndex = tasks.findIndex((t) => t.id === over.id);
@@ -272,14 +330,12 @@ function KanbanBoard() {
             }
             return;
         }
-
         const originalStatus = activeTask.status;
         setTasks((prevTasks) =>
             prevTasks.map((t) =>
                 t.id === active.id ? { ...t, status: newStatus } : t
             )
         );
-
         apiClient
             .put(`/items/${active.id}`, { ...activeTask, status: newStatus })
             .then(() => {
@@ -331,7 +387,6 @@ function KanbanBoard() {
                     </Button>
                 </HStack>
             </HStack>
-
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}
@@ -340,21 +395,31 @@ function KanbanBoard() {
             >
                 <Grid templateColumns="repeat(3, 1fr)" gap={6}>
                     <GridItem>
-                        <Column title="A Fazer" tasks={todoTasks} />
+                        <Column
+                            title="A Fazer"
+                            tasks={todoTasks}
+                            onDelete={handleDeleteItem}
+                        />
                     </GridItem>
                     <GridItem>
-                        <Column title="Em Andamento" tasks={inProgressTasks} />
+                        <Column
+                            title="Em Andamento"
+                            tasks={inProgressTasks}
+                            onDelete={handleDeleteItem}
+                        />
                     </GridItem>
                     <GridItem>
-                        <Column title="Concluído" tasks={doneTasks} />
+                        <Column
+                            title="Concluído"
+                            tasks={doneTasks}
+                            onDelete={handleDeleteItem}
+                        />
                     </GridItem>
                 </Grid>
-
                 <DragOverlay>
                     {activeTask ? <Card task={activeTask} /> : null}
                 </DragOverlay>
             </DndContext>
-
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent as="form" onSubmit={handleCreateTask}>
