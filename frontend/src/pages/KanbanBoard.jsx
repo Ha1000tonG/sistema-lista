@@ -28,7 +28,7 @@ import {
     GridItem,
     IconButton,
     Avatar,
-    Spacer, // <-- ADICIONADO PARA O LAYOUT DO CABEÇALHO
+    Spacer,
 } from "@chakra-ui/react";
 import { FaTrash } from "react-icons/fa";
 
@@ -50,7 +50,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 const apiClient = axios.create({
-    baseURL: "https://kanban-api-uzsd.onrender.com", // URL da API hospedada na Render
+    baseURL: "https://kanban-api-uzsd.onrender.com",
 });
 
 apiClient.interceptors.request.use(
@@ -82,7 +82,7 @@ apiClient.interceptors.response.use(
 const statusColorMap = {
     "A Fazer": "gray",
     "Em Andamento": "blue",
-    "Concluído": "green",
+    Concluído: "green",
 };
 
 const Card = ({ task, onDelete, onEdit, dragAttributes, dragListeners }) => (
@@ -260,10 +260,7 @@ function KanbanBoard() {
         onClose: onEditClose,
     } = useDisclosure();
     const [editingTask, setEditingTask] = useState(null);
-
-    // --- ADIÇÃO: Novo estado para o usuário logado ---
     const [currentUser, setCurrentUser] = useState(null);
-
     const toast = useToast();
     const ITEM_TYPE = "kanban_card";
 
@@ -272,36 +269,39 @@ function KanbanBoard() {
         window.location.href = "/login";
     };
 
-    const fetchTasks = useCallback(async () => {
-        try {
-            const response = await axios.get("http://localhost:8000/items/", {
-                params: { item_type: ITEM_TYPE },
-            });
-            setTasks(response.data);
-        } catch (error) {
-            if (error.response?.status !== 401) {
-                console.error("Erro ao buscar as tarefas:", error);
-                toast({ title: "Erro ao carregar o quadro.", status: "error" });
-            }
-        }
-    }, [toast]);
-
-    // --- ADIÇÃO: useEffect foi modificado para buscar o usuário ---
+    // Apenas a lógica do useEffect foi refeita para ser mais robusta
     useEffect(() => {
-        fetchTasks();
-        const fetchCurrentUser = async () => {
+        const loadPageData = async () => {
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                return;
+            }
+
             try {
-                const response = await apiClient.get("/users/me/");
-                setCurrentUser(response.data);
+                const [userResponse, tasksResponse] = await Promise.all([
+                    apiClient.get("/users/me/"),
+                    axios.get("http://localhost:8000/items/", {
+                        params: { item_type: ITEM_TYPE },
+                    }),
+                ]);
+
+                setCurrentUser(userResponse.data);
+                setTasks(tasksResponse.data);
             } catch (error) {
-                console.error(
-                    "Não foi possível buscar os dados do usuário.",
-                    error
-                );
+                if (error.response?.status !== 401) {
+                    console.error("Erro ao carregar dados da página:", error);
+                    toast({
+                        title: "Erro ao carregar o quadro.",
+                        description:
+                            "Não foi possível buscar os dados do servidor.",
+                        status: "error",
+                    });
+                }
             }
         };
-        fetchCurrentUser();
-    }, [fetchTasks]);
+
+        loadPageData();
+    }, [toast]);
 
     const handleCreateTask = async (event) => {
         event.preventDefault();
@@ -318,7 +318,11 @@ function KanbanBoard() {
                 duration: 3000,
                 isClosable: true,
             });
-            fetchTasks();
+            // Re-executa a busca para garantir consistência
+            const response = await axios.get("http://localhost:8000/items/", {
+                params: { item_type: ITEM_TYPE },
+            });
+            setTasks(response.data);
             onCreateClose();
             setNewItem({ title: "", content: "", tags: "" });
         } catch (error) {
@@ -339,7 +343,11 @@ function KanbanBoard() {
                     duration: 2000,
                     isClosable: true,
                 });
-                fetchTasks();
+                const response = await axios.get(
+                    "http://localhost:8000/items/",
+                    { params: { item_type: ITEM_TYPE } }
+                );
+                setTasks(response.data);
             } catch (error) {
                 if (error.response && error.response.status === 403) {
                     toast({
@@ -385,7 +393,10 @@ function KanbanBoard() {
                 duration: 3000,
                 isClosable: true,
             });
-            fetchTasks();
+            const response = await axios.get("http://localhost:8000/items/", {
+                params: { item_type: ITEM_TYPE },
+            });
+            setTasks(response.data);
             onEditClose();
         } catch (error) {
             if (error.response && error.response.status === 403) {
@@ -415,6 +426,7 @@ function KanbanBoard() {
         setActiveTask(task);
     };
 
+    // A LÓGICA DE DRAG AND DROP RESTAURADA
     const handleDragEnd = (event) => {
         setActiveTask(null);
         const { active, over } = event;
@@ -484,15 +496,13 @@ function KanbanBoard() {
 
     return (
         <Container maxW="container.fluid" p={5}>
-            {/* --- ADIÇÃO: O cabeçalho foi reestruturado --- */}
             <HStack justifyContent="space-between" mb={8} w="100%">
-                {/* Agrupando os itens da esquerda */}
                 <HStack spacing={4} align="center">
                     <Heading as="h1" size="xl">
                         Quadro Kanban
                     </Heading>
                     {currentUser && (
-                        <HStack p={2} borderRadius="md">
+                        <HStack bg="gray.700" p={2} borderRadius="md">
                             <Avatar name={currentUser.username} size="sm" />
                             <Text fontWeight="medium">
                                 {currentUser.username}
@@ -500,9 +510,7 @@ function KanbanBoard() {
                         </HStack>
                     )}
                 </HStack>
-                <Spacer />{" "}
-                {/* O Spacer agora empurra apenas os botões para a direita */}
-                {/* Agrupando os itens da direita */}
+                <Spacer />
                 <HStack>
                     <Button colorScheme="green" onClick={onCreateOpen}>
                         Adicionar Tarefa
@@ -549,6 +557,7 @@ function KanbanBoard() {
                     {activeTask ? <Card task={activeTask} /> : null}
                 </DragOverlay>
             </DndContext>
+
             <Modal isOpen={isCreateOpen} onClose={onCreateClose}>
                 <ModalOverlay />
                 <ModalContent as="form" onSubmit={handleCreateTask}>

@@ -15,12 +15,13 @@ import {
     Text, // <--- Adicionado
     Link as ChakraLink, // <--- Adicionado
 } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const toast = useToast();
+    const navigate = useNavigate();
 
     // 2. ADICIONE ESTE BLOCO useEffect
     useEffect(() => {
@@ -59,7 +60,7 @@ function LoginPage() {
                 duration: 3000,
                 isClosable: true,
             });
-            window.location.href = "/admin";
+            navigate("/admin");
         } catch (error) {
             console.error("Falha na autenticação:", error);
             toast({

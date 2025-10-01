@@ -11,6 +11,14 @@ const PrivateRoute = ({ children }) => {
     return token ? children : <Navigate to="/login" />;
 };
 
+// --- NOVO COMPONENTE: Rota Padrão Inteligente ---
+const DefaultRoute = () => {
+    const token = localStorage.getItem('access_token');
+    // Se tiver token, a página padrão é /admin.
+    // Se NÃO tiver token, a página padrão é /login.
+    return token ? <Navigate to="/admin" /> : <Navigate to="/login" />;
+}
+
 function App() {
     return (
         <BrowserRouter>
@@ -26,7 +34,7 @@ function App() {
                         </PrivateRoute>
                     }
                 />
-                <Route path="*" element={<Navigate to="/admin" />} />
+                <Route path="*" element={<DefaultRoute />} />
             </Routes>
         </BrowserRouter>
     );
