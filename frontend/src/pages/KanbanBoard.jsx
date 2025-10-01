@@ -49,7 +49,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const apiClient = axios.create({ baseURL: "http://localhost:8000" });
+const apiClient = axios.create({
+    baseURL: "https://kanban-api-uzsd.onrender.com", // URL da API hospedada na Render
+});
 
 apiClient.interceptors.request.use(
     (config) => {
