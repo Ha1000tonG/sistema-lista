@@ -1,7 +1,7 @@
 // frontend/src/pages/LoginPage.jsx
 
-import { useState, useEffect } from "react"; // <--- Adicionado useEffect
-import apiClient from '../api/api'; // Sem as chaves
+import { useState, useEffect } from "react";
+import apiClient from "../api/api";
 import {
     Box,
     Heading,
@@ -12,8 +12,8 @@ import {
     VStack,
     useToast,
     Container,
-    Text, // <--- Adicionado
-    Link as ChakraLink, // <--- Adicionado
+    Text,
+    Link as ChakraLink,
 } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
@@ -23,23 +23,19 @@ function LoginPage() {
     const toast = useToast();
     const navigate = useNavigate();
 
-    // 2. ADICIONE ESTE BLOCO useEffect
     useEffect(() => {
-        // Verifica se há uma mensagem de logout no localStorage
         const logoutMessage = localStorage.getItem("logout_message");
         if (logoutMessage) {
-            // Se houver, exibe o toast
             toast({
                 title: "Sessão Encerrada",
                 description: logoutMessage,
-                status: "info", // Usamos 'info' para uma mensagem informativa
+                status: "info",
                 duration: 5000,
                 isClosable: true,
             });
-            // Limpa a mensagem para que não apareça novamente
             localStorage.removeItem("logout_message");
         }
-    }, [toast]); // O toast é uma dependência deste efeito
+    }, [toast]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -48,12 +44,13 @@ function LoginPage() {
         params.append("password", password);
 
         try {
-            const response = await apiClient.post(
-                "http://localhost:8000/token",
-                params
-            );
-            const { access_token } = response.data;
-            localStorage.setItem("access_token", access_token);
+            const response = await apiClient.post("/token", params, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            });
+
+            localStorage.setItem("access_token", response.data.access_token);
             toast({
                 title: "Login bem-sucedido!",
                 status: "success",
@@ -84,7 +81,8 @@ function LoginPage() {
                 minW="400px"
             >
                 <Heading as="h1" size="lg" textAlign="center" mb={6}>
-                    Login do Administrador
+                    {" "}
+                    Login do Administrador{" "}
                 </Heading>
                 <VStack as="form" onSubmit={handleSubmit} spacing={4}>
                     <FormControl isRequired>
@@ -104,15 +102,17 @@ function LoginPage() {
                         />
                     </FormControl>
                     <Button type="submit" colorScheme="blue" width="full">
-                        Entrar
+                        {" "}
+                        Entrar{" "}
                     </Button>
                 </VStack>
-                    <Text mt={6} textAlign="center">
-                    Caso não esteja cadastrado,{' '}
+                <Text mt={6} textAlign="center">
+                    Caso não esteja cadastrado,{" "}
                     <ChakraLink as={RouterLink} to="/signup" color="blue.400">
-                        clique aqui.
+                        {" "}
+                        clique aqui.{" "}
                     </ChakraLink>
-        </Text>
+                </Text>
             </Box>
         </Container>
     );

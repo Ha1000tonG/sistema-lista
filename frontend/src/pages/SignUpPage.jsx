@@ -1,8 +1,7 @@
 // frontend/src/pages/SignUpPage.jsx
 
-import { useState } from "react"; // <--- Adicionado useState
-import apiClient from '../api/api'; // Sem as chaves
-//import axios from "axios";
+import { useState } from "react";
+import apiClient from "../api/api"; // Corrigido: importação default
 import {
     Box,
     Heading,
@@ -22,17 +21,16 @@ function SignUpPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const toast = useToast();
-    const navigate = useNavigate(); // Hook para navegação
+    const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
         try {
-            await apiClient.post("http://localhost:8000/users/", {
+            // Corrigido: usa apiClient e apenas o endpoint
+            await apiClient.post("/users/", {
                 username: username,
                 password: password,
             });
-
             toast({
                 title: "Conta criada com sucesso!",
                 description: "Você já pode fazer o login.",
@@ -40,15 +38,15 @@ function SignUpPage() {
                 duration: 5000,
                 isClosable: true,
             });
-
-            // Redireciona para a página de login após o sucesso
             navigate("/login");
         } catch (error) {
-            const errorMsg =
-                error.response?.data?.detail || "Usuário ou senha inválidos.";
+            const errorMsg = error.response?.data?.detail || "Ocorreu um erro.";
             toast({
                 title: "Erro ao criar a conta.",
-                description: errorMsg,
+                description:
+                    errorMsg === "Username já registrado"
+                        ? "Este nome de usuário já está em uso."
+                        : errorMsg,
                 status: "error",
                 duration: 5000,
                 isClosable: true,
@@ -67,7 +65,8 @@ function SignUpPage() {
                 minW="400px"
             >
                 <Heading as="h1" size="lg" textAlign="center" mb={6}>
-                    Criar Nova Conta
+                    {" "}
+                    Criar Nova Conta{" "}
                 </Heading>
                 <VStack as="form" onSubmit={handleSubmit} spacing={4}>
                     <FormControl isRequired>
@@ -87,13 +86,15 @@ function SignUpPage() {
                         />
                     </FormControl>
                     <Button type="submit" colorScheme="green" width="full">
-                        Cadastrar
+                        {" "}
+                        Cadastrar{" "}
                     </Button>
                 </VStack>
                 <Text mt={6} textAlign="center">
                     Já tem uma conta?{" "}
                     <ChakraLink as={RouterLink} to="/login" color="blue.400">
-                        Faça o login aqui.
+                        {" "}
+                        Faça o login aqui.{" "}
                     </ChakraLink>
                 </Text>
             </Box>
