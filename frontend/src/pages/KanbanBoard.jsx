@@ -1,4 +1,4 @@
-// frontend/src/pages/KanbanBoard.jsx lida com o quadro Kanban com drag-and-drop e modais
+// frontend/src/pages/KanbanBoard.jsx
 
 import { useState, useEffect } from "react";
 import apiClient from "../api/api";
@@ -220,7 +220,7 @@ function KanbanBoard() {
                         Quadro Kanban
                     </Heading>
                     {currentUser && (
-                        <HStack bg="gray.700" p={2} borderRadius="md">
+                        <HStack >
                             <Avatar name={currentUser.username} size="sm" />
                             <Text fontWeight="medium">
                                 {currentUser.username}
