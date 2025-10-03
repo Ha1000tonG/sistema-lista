@@ -1,4 +1,4 @@
-// frontend/src/pages/LoginPage.jsx
+// frontend/src/pages/LoginPage.jsx  lida com a página de login do administrador
 
 import { useState, useEffect } from "react";
 import apiClient from "../api/api";

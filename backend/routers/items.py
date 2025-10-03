@@ -1,4 +1,4 @@
-# backend/routers/items.py
+# backend/routers/items.py lida com operações CRUD para itens de conteúdo
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional

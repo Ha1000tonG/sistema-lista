@@ -1,4 +1,4 @@
-// frontend/src/api/api.js
+// frontend/src/api/api.js lida com chamadas de API e interceptores
 
 import axios from 'axios';
 

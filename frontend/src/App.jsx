@@ -1,4 +1,4 @@
-// frontend/src/App.jsx
+// frontend/src/App.jsx lida com rotas e proteção de rotas
 
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";

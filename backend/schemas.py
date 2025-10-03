@@ -1,4 +1,4 @@
-# backend/schemas.py
+# backend/schemas.py define os esquemas Pydantic para validação de dados
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional

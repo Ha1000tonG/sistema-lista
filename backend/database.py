@@ -1,4 +1,4 @@
-# backend/database.py
+# backend/database.py lida com a configuração do banco de dados
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base

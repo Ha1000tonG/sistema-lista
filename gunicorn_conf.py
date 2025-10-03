@@ -1,4 +1,4 @@
-# gunicorn_conf.py
+# gunicorn_conf.py configura o Gunicorn para servir a aplicação FastAPI
 import multiprocessing
 
 # Define o número de workers com base nos núcleos da CPU

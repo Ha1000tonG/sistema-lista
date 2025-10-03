@@ -1,4 +1,5 @@
-# backend/models.py
+# backend/models.py define os modelos de banco de dados usando SQLAlchemy
+
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func

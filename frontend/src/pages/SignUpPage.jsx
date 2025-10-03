@@ -1,4 +1,4 @@
-// frontend/src/pages/SignUpPage.jsx
+// frontend/src/pages/SignUpPage.jsx lida com a página de cadastro de novos usuários
 
 import { useState } from "react";
 import apiClient from "../api/api"; // Corrigido: importação default

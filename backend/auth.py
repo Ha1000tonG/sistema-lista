@@ -1,4 +1,4 @@
-# backend/auth.py
+# backend/auth.py lida com autenticação e autorização
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt

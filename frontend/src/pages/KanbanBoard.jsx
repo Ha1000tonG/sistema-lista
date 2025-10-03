@@ -1,4 +1,4 @@
-// frontend/src/pages/KanbanBoard.jsx
+// frontend/src/pages/KanbanBoard.jsx lida com o quadro Kanban com drag-and-drop e modais
 
 import { useState, useEffect } from "react";
 import apiClient from "../api/api";
