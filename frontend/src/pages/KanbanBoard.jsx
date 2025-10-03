@@ -156,9 +156,13 @@ function KanbanBoard() {
     const handleUpdateTask = async (event) => {
         event.preventDefault();
         try {
+            // eslint-disable-next-line no-unused-vars
             const { id, owner, created_at, updated_at, ...dataToUpdate } = editingTask;
             await apiClient.put(`/items/${id}`, dataToUpdate);
-            toast({ title: "Tarefa atualizada com sucesso!", status: "success" });
+            toast({
+                title: "Tarefa atualizada com sucesso!",
+                status: "success",
+            });
             fetchTasks();
             onEditClose();
         } catch (error) {
@@ -185,26 +189,54 @@ function KanbanBoard() {
         if (!over || active.id === over.id) return;
         const activeTask = tasks.find((t) => t.id === active.id);
         const overIsColumn = over.data.current?.type === "Column";
-        const newStatus = overIsColumn ? over.id : tasks.find((t) => t.id === over.id)?.status;
+        const newStatus = overIsColumn
+            ? over.id
+            : tasks.find((t) => t.id === over.id)?.status;
         if (!newStatus || activeTask.status === newStatus) {
             const activeIndex = tasks.findIndex((t) => t.id === active.id);
             const overIndex = tasks.findIndex((t) => t.id === over.id);
-            if (activeIndex !== overIndex) { setTasks((items) => arrayMove(items, activeIndex, overIndex)); }
+            if (activeIndex !== overIndex) {
+                setTasks((items) => arrayMove(items, activeIndex, overIndex));
+            }
             return;
         }
         const originalStatus = activeTask.status;
-        setTasks((prevTasks) => prevTasks.map((t) => (t.id === active.id ? { ...t, status: newStatus } : t)));
+        setTasks((prevTasks) =>
+            prevTasks.map((t) =>
+                t.id === active.id ? { ...t, status: newStatus } : t
+            )
+        );
+        // eslint-disable-next-line no-unused-vars
         const { id, owner, created_at, updated_at, ...taskData } = activeTask;
         const payload = { ...taskData, status: newStatus };
-        apiClient.put(`/items/${active.id}`, payload)
-            .then(() => { toast({ title: `Tarefa movida para "${newStatus}"!`, status: "success" }); })
+        apiClient
+            .put(`/items/${active.id}`, payload)
+            .then(() => {
+                toast({
+                    title: `Tarefa movida para "${newStatus}"!`,
+                    status: "success",
+                });
+            })
             .catch((error) => {
                 if (error.response && error.response.status === 403) {
-                    toast({ title: "Acesso Negado", description: "Apenas o autor do cartão pode movê-lo.", status: "error" });
+                    toast({
+                        title: "Acesso Negado",
+                        description: "Apenas o autor do cartão pode movê-lo.",
+                        status: "error",
+                    });
                 } else if (error.response?.status !== 401) {
-                    toast({ title: "Falha ao mover a tarefa.", status: "error" });
+                    toast({
+                        title: "Falha ao mover a tarefa.",
+                        status: "error",
+                    });
                 }
-                setTasks((prevTasks) => prevTasks.map((t) => (t.id === active.id ? { ...t, status: originalStatus } : t)));
+                setTasks((prevTasks) =>
+                    prevTasks.map((t) =>
+                        t.id === active.id
+                            ? { ...t, status: originalStatus }
+                            : t
+                    )
+                );
             });
     };
 
