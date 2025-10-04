@@ -22,25 +22,23 @@ def create_item(item: schemas.ContentItemCreate, db: Session = Depends(database.
 @router.get("/", response_model=List[schemas.ContentItem])
 def read_items(
     db: Session = Depends(database.get_db),
-    # <-- ADICIONADO: Força autenticação
-    current_user: schemas.User = Depends(auth.get_current_user),
     skip: int = 0,
     limit: int = 100,
     item_type: Optional[str] = None
 ):
-    # 1. Filtra primeiro pelo ID do usuário logado
-    query = db.query(models.ContentItem).filter(
-        models.ContentItem.owner_id == current_user.id
-    )
+    # 1. REMOVIDO: a dependência current_user = Depends(auth.get_current_user)
 
-    # 2. Em seguida, aplica o filtro de item_type, se fornecido
+    # 2. REMOVIDO: o filtro por models.ContentItem.owner_id == current_user.id
+    query = db.query(models.ContentItem)
+
+    # 3. Mantém apenas o filtro de item_type
     if item_type:
         query = query.filter(models.ContentItem.item_type == item_type)
 
     items = query.offset(skip).limit(limit).all()
     return items
 
-# --- ROTA DE LEITURA DE ITEM POR ID --- ADICIONADA --- COM VERIFICAÇÃO DE POSSE --- 
+# --- ROTA DE LEITURA DE ITEM POR ID --- ADICIONADA --- COM VERIFICAÇÃO DE POSSE ---
 @router.get("/{item_id}", response_model=schemas.ContentItem)
 def read_item(item_id: int, db: Session = Depends(database.get_db)):
     db_item = db.query(models.ContentItem).filter(

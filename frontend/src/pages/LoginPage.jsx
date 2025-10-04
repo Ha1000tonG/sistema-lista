@@ -82,7 +82,7 @@ function LoginPage() {
             >
                 <Heading as="h1" size="lg" textAlign="center" mb={6}>
                     {" "}
-                    Login do Administrador{" "}
+                    Acessar o Quadro Kanban{" "}
                 </Heading>
                 <VStack as="form" onSubmit={handleSubmit} spacing={4}>
                     <FormControl isRequired>
