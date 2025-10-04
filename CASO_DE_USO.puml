@@ -1,37 +1,55 @@
 @startuml CASO_DE_USO
 
-' Define o título do diagrama
-title API de Gerenciamento de Conteúdos - Diagrama de Casos de Uso
+' ------------------------------------------------------------------
+' TÍTULO E ORIENTAÇÃO
+' ------------------------------------------------------------------
+title Diagrama de Casos de Uso - Sistema Kanban com Gerenciamento de Posse (v1.0 Final)
 
-' Define os atores
+' Define a direção do diagrama
 left to right direction
-actor "Administrador" as admin
-actor "Visitante" as visitor
 
-' Define o retângulo que representa o sistema
-rectangle {
+' ------------------------------------------------------------------
+' ATOR
+' ------------------------------------------------------------------
+' O único ator é o usuário que está logado no sistema (autenticado)
+actor "Usuário Autenticado" as AuthUser
 
-  ' Casos de uso do Administrador
-  usecase "Autenticar no Sistema" as UC1
-  usecase "Gerenciar Conteúdo" as UC2
+' ------------------------------------------------------------------
+' SISTEMA (LIMITE)
+' ------------------------------------------------------------------
+rectangle "Quadro Kanban Compartilhado" {
 
-  ' Casos de uso do Visitante
-  usecase "Listar Conteúdos" as UC3
-  usecase "Visualizar um Conteúdo" as UC4
+  ' Casos de Uso de Acesso
+  usecase "Cadastrar Nova Conta" as UC_SIGNUP
+  usecase "Fazer Login (Receber Token JWT)" as UC_LOGIN
+  usecase "Excluir Conta (Deleção em Cascata)" as UC_DEL_USER
+
+  ' Casos de Uso de Visualização e Colaboração
+  usecase "Visualizar TODOS os Cartões" as UC_LIST_ALL
+  usecase "Visualizar Detalhes do Cartão" as UC_VIEW_DETAIL
+
+  ' Casos de Uso de Gerenciamento de Posse (Ações CRUD)
+  usecase "Criar Cartão (Ganha Posse)" as UC_CREATE
+  usecase "Editar Cartão Próprio" as UC_EDIT
+  usecase "Excluir Cartão Próprio" as UC_DELETE
+  usecase "Mover Cartão (Drag & Drop)" as UC_MOVE
+  usecase "Transferir Posse do Cartão" as UC_TRANSFER
 }
 
-' Ligações dos atores aos casos de uso
-admin -- UC1
-admin -- UC2
+' ------------------------------------------------------------------
+' RELACIONAMENTOS (O Usuário Autenticado faz todas as ações)
+' ------------------------------------------------------------------
+AuthUser --> UC_SIGNUP
+AuthUser --> UC_LOGIN
+AuthUser --> UC_DEL_USER
+AuthUser --> UC_LIST_ALL
+AuthUser --> UC_VIEW_DETAIL
 
-visitor -- UC3
-visitor -- UC4
-
-' Detalhando o caso de uso "Gerenciar Conteúdo"
-' A relação "include" significa que para gerenciar, é preciso fazer uma dessas ações.
-UC2 .> (Adicionar Conteúdo) : <<include>>
-UC2 .> (Editar Conteúdo) : <<include>>
-UC2 .> (Excluir Conteúdo) : <<include>>
-
+' Ligações diretas para as ações de Gerenciamento de Posse
+AuthUser --> UC_CREATE
+AuthUser --> UC_EDIT
+AuthUser --> UC_DELETE
+AuthUser --> UC_MOVE
+AuthUser --> UC_TRANSFER
 
 @enduml

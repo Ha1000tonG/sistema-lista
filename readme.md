@@ -1,36 +1,50 @@
-# Projeto: API de Conteúdo flexível (Headless CMS) com Front-end em React
+# 🚀 Projeto Full-Stack: Quadro Kanban (v1.0)
 
-Este é um projeto full-stack construído para demonstrar a criação de uma API de conteúdo flexível (Headless CMS) usando FastAPI e um front-end de consumo em React.
+Este projeto é uma demonstração full-stack que evoluiu de um Headless CMS genérico para um **Quadro Kanban de Gerenciamento de Posse**. Ele exibe o domínio de arquitetura, segurança e integridade de dados em aplicações modernas.
 
-A aplicação serve como um motor para um portfólio, mas foi projetada para ser genérica o suficiente para gerenciar qualquer tipo de conteúdo (posts de blog, depoimentos, etc.). A interface permite criar, ler, atualizar e excluir itens de conteúdo (CRUD).
-
----
-
-## Tecnologias Utilizadas
-
-Este projeto é dividido em duas partes principais: o Back-end e o Front-end.
-
-### **Back-end (API Genérica)**
-* **Framework:** FastAPI
-* **Linguagem:** Python 3
-* **Banco de Dados:** SQLite
-* **ORM (Object-Relational Mapper):** SQLAlchemy
-* **Servidor ASGI:** Uvicorn
-* **Validação de Dados:** Pydantic
-* **Gerenciamento de Dependências:** Pip com `requirements.txt`
-
-### **Front-end (Interface de Portfólio)**
-* **Biblioteca:** React 18
-* **Ferramenta de Build:** Vite
-* **Linguagem:** JavaScript (JSX)
-* **Biblioteca de Componentes UI:** **Chakra UI**
-* **Cliente HTTP:** Axios
-* **Gerenciamento de Dependências:** NPM com `package.json`
-* **Pré-requisitos:** Node.js
+A principal regra de negócio é o **Quadro Compartilhado**: todos os usuários logados podem visualizar todos os cartões, mas as ações de modificação são estritamente restritas ao dono original do item (Gerenciamento de Posse).
 
 ---
 
-## Como Executar o Projeto
+## ✨ Funcionalidades Avançadas e Destaques
+
+* **Segurança (JWT):** Implementação completa de autenticação com **JSON Web Tokens (JWT)**, protegendo todas as rotas de escrita e manipulação de dados.
+* **Gerenciamento de Posse:** Controles de autorização no *backend* garantem que apenas o `owner_id` de um cartão possa realizar `PUT` e `DELETE`.
+* **Transferência de Posse:** Rota **PATCH** dedicada para que o dono de um cartão possa transferir a propriedade para outro usuário cadastrado.
+* **Deleção em Cascata:** Configuração de integridade de dados que, ao excluir um usuário, **remove automaticamente todos os cartões** associados a ele.
+* **Controle de Ambiente:** Configuração isolada para alternar entre o **SQLite** (ambiente local) e o **PostgreSQL** (produção).
+* **Experiência do Usuário (UX):** Interface com funcionalidade **Drag and Drop** para mover cartões entre as colunas, atualizando o *status* em tempo real no backend.
+
+---
+
+## 🛠️ Tecnologias Utilizadas e Propósito
+
+### **Back-end (API de Gerenciamento de Posse)**
+
+O foco foi em performance, segurança e integridade de dados.
+
+| Tecnologia | Papel no Projeto |
+| :--- | :--- |
+| **Framework:** FastAPI | Alta performance (Async/Await) e produtividade para a criação de rotas RESTful. |
+| **Validação:** Pydantic | Definição de schemas de dados e validação rigorosa dos *payloads* de entrada e saída da API. |
+| **ORM:** SQLAlchemy | Abstração do banco de dados, facilitando a troca entre SQLite (dev) e PostgreSQL (prod). Essencial para o relacionamento `ON DELETE CASCADE`. |
+| **Segurança:** `python-jose` / `passlib` | Implementação do JWT e *hashing* seguro de senhas. |
+| **Configuração:** `pydantic-settings` | Gerenciamento seguro de variáveis de ambiente (`SECRET_KEY`, `DATABASE_URL`) entre os ambientes. |
+
+### **Front-end (Interface Kanban)**
+
+O foco foi em reatividade, usabilidade e comunicação com a API.
+
+| Tecnologia | Papel no Projeto |
+| :--- | :--- |
+| **Biblioteca:** React | Base reativa da aplicação, utilizando *hooks* para gerenciamento de estado dos cartões e usuários. |
+| **UI:** Chakra UI | *Design System* modular para componentes modernos, responsivos e acessíveis (`Modal`, `Select`, `Input`). |
+| **D&D:** `@dnd-kit` | Biblioteca escolhida para a funcionalidade de arrastar e soltar cartões no Quadro Kanban. |
+| **Cliente HTTP:** Axios | Gerenciamento de requisições, com um **Interceptor** que automaticamente envia o token JWT e trata a expiração de sessão (`401 Unauthorized`). |
+
+---
+
+## ⚙️ Como Executar o Projeto (Localmente)
 
 Para rodar este projeto, você precisará de dois terminais abertos, um para o back-end e um para o front-end.
 
@@ -38,42 +52,44 @@ Para rodar este projeto, você precisará de dois terminais abertos, um para o b
 
 ```bash
 # A partir da pasta raiz do projeto (ex: sistema-lista/)
-# Crie e ative o ambiente virtual (se ainda não o fez)
+# 1. Crie e ative o ambiente virtual
 
-# No Windows:
-.\backend\venv\Scripts\activate
-
-# No macOS/Linux:
-source backend/venv/bin/activate
-
-# Instale as dependências
+# 2. Instale as dependências
 pip install -r backend/requirements.txt
 
-# Inicie o servidor da API (a partir da raiz)
+# 3. Inicie o servidor da API (a partir da raiz)
 uvicorn backend.main:app --reload
 
+# O servidor estará ativo em http://localhost:8000
 ```
+
 ### 2. Rodando o Frontend
 
 ```bash
 # Em um novo terminal, a partir da pasta raiz do projeto
 cd frontend
 
-# Instale as dependências (se ainda não o fez)
+# 1. Instale as dependências
 npm install
 
-# Inicie o servidor de desenvolvimento
+# 2. Inicie o servidor de desenvolvimento
 npm run dev
 
+# O frontend estará acessível em http://localhost:5173
 ```
+
 
 ## Endpoints da API
 A API fornece os seguintes endpoints genéricos para o gerenciamento de itens de conteúdo:
 
-| Método | URL                   | Ação                                               |
-| :----- | :-------------------- | :------------------------------------------------- |
-| POST   | `/items/`             | Cria um novo item de conteúdo.                     |
-| GET    | `/items/`             | Lista todos os itens. Aceita `?item_type=` para filtrar. |
-| GET    | `/items/{item_id}`    | Retorna um item específico pelo seu ID.            |
-| PUT    | `/items/{item_id}`    | Atualiza um item existente.                        |
-| DELETE | `/items/{item_id}`    | Exclui um item.                                    |
+| Método | URL                   | Ação                                                  | Status |
+| :----- | :-------------------- | :---------------------------------------------------- | :------------------------ |
+| POST   | `/users/`             | Cadastra um novo usuário.                             | PÚBLICO |
+| POST   | `/token`              | Realiza o login e retorna o token JWT.                | PÚBLICO |
+| GET    | `/users/me`           | Retorna os dados do usuário logado.                   | PROTEGIDO |
+| DELETE | `/users/{user_id}`    | 	Exclui o usuário (apenas auto-exclusão permitida) e todos os seus itens. | PROTEGIDO |
+| POST   | `/items/`             | 	Cria um novo item (automaticamente atribuído ao usuário logado).         | PROTEGIDO |
+| GET    | `/items/`             | Lista TODOS os cartões (Quadro Compartilhado).        | PÚBLICO |
+| PUT    | `/items/{item_id}`    | Atualiza um item. Apenas o dono pode atualizar.       | PROTEGIDO |
+| PATCH  | `/items/{item_id}/transfer/{new_owner_id}`| Transfere a posse do item para outro usuário. | PROTEGIDO |
+| DELETE | `/items/{item_id}`    | Exclui um item. Apenas o dono pode excluir.           | PROTEGIDO |

@@ -1,33 +1,49 @@
-# Documento de Requisitos - API de Conteúdo "Portfólio" v1.0
+# Documento de Especificação de Requisitos - Sistema Kanban Compartilhado (v2.3)
 
-## 1. Introdução
+## 1. Introdução e Objetivo
 
-Este documento especifica os requisitos para a primeira versão (v1.0) de uma API de conteúdo genérica (Headless CMS). O objetivo do sistema é gerenciar "Itens de Conteúdo" de forma flexível, permitindo que diferentes aplicações front-end (como um portfólio, um blog, etc.) possam consumir e exibir esses dados.
+Este documento especifica os requisitos funcionais e não funcionais para o **Sistema Kanban Compartilhado e Gerenciamento de Posse de Dados**. O objetivo principal do sistema é fornecer uma plataforma Full-Stack segura e colaborativa que:
+
+1.  Permita a visualização de **todos** os cartões por qualquer usuário logado (Quadro Kanban Compartilhado).
+2.  Garanta que a criação, edição, exclusão e transferência de um cartão sejam estritamente restritas ao seu **dono** (Regra de Negócio Central).
 
 ## 2. Atores do Sistema
 
-* **A implementação atual é pública e aberta**
-
-*(Nota: As funcionalidades abaixo descrita na v1.0 do sistema, ainda não não foi implementado).*
-* **Administrador/Autor:** O usuário responsável por gerenciar (criar, editar, excluir) os itens de conteúdo próprio através de uma interface de cliente (front-end).
-* **Visitante:** Qualquer usuário consome o conteúdo exibido pela aplicação cliente, apenas listando e visualizando.
+* **Usuário Autenticado:** Qualquer indivíduo que tenha concluído o processo de cadastro (`/users/`) e autenticação (`/token`). Este é o único ator com permissão para acessar e interagir com as funcionalidades do sistema, incluindo:
+    * **Colaboração:** Visualizar todos os cartões na listagem.
+    * **Gerenciamento de Posse:** Criar novos cartões, e manipular (editar, excluir, transferir posse) *apenas* os cartões de sua propriedade.
 
 ## 3. Requisitos Funcionais (RF)
 
-| ID    | Nome do Requisito      | Descrição                                                                                                                                                             | Ator Principal |
-| :---- | :--------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------- |
-| RF001 | **(Futuro)** Autenticar Administrador | O Administrador deve poder fazer login no sistema com um usuário e senha para ter acesso exclusivo às funções de gerenciamento.                                     | Administrador  |
-| RF002 | Adicionar Conteúdo     | O sistema deve permitir a criação de um novo item de conteúdo, fornecendo um tipo (ex: 'portfolio_project'), título, descrição e outros campos opcionais.                 | Administrador  |
-| RF003 | Editar Conteúdo        | O sistema deve permitir a edição das informações de um item de conteúdo existente.                                                                                    | Administrador  |
-| RF004 | Excluir Conteúdo       | O sistema deve permitir a remoção de um item de conteúdo do sistema.                                                                                                    | Administrador  |
-| RF005 | Listar Conteúdos       | O sistema deve permitir a visualização de uma lista de todos os itens de conteúdo, com a opção de filtrar por tipo de conteúdo. | Visitante      |
-| RF006 | Visualizar um Conteúdo | O sistema deve permitir a visualização dos detalhes completos de um item de conteúdo específico.                                                                            | Visitante      |
+Os requisitos estão separados por escopo (Sistema/API e Interface/UX).
+
+### 3.1. Requisitos do Sistema (API e Regra de Negócio)
+
+| ID | Nome do Requisito | Descrição | Ator Principal |
+| :--- | :--- | :--- | :--- |
+| RF001 | Autenticação e Cadastro | O sistema deve permitir o **cadastro** de novos usuários (`/users/`), o **login** de usuários existentes (`/token`) e a **proteção** de todas as rotas de escrita (JWT). | Usuário Autenticado |
+| RF002 | Criar Conteúdo | O sistema deve permitir que um Usuário Autenticado crie um novo item, **automaticamente definindo-o como proprietário** (`/items/`). | Usuário Autenticado |
+| RF003 | Editar Conteúdo | O sistema deve permitir que um Usuário Autenticado modifique **somente seus próprios** itens de conteúdo (`/items/{item_id}`). | Usuário Autenticado |
+| RF004 | Excluir Conteúdo | O sistema deve permitir que um Usuário Autenticado remova **somente seus próprios** itens de conteúdo do sistema (`/items/{item_id}`). | Usuário Autenticado |
+| RF005 | Listar Conteúdos | O sistema deve permitir a visualização de uma lista de todos os itens de conteúdo **independente do usuário conectado** (Quadro Kanban Compartilhado). | Usuário Autenticado |
+| RF006 | Visualizar um Conteúdo | O sistema deve permitir a visualização dos detalhes completos de um item de conteúdo específico. | Usuário Autenticado |
+| RF007 | Transferência de Posse | O sistema deve permitir que o **dono atual** de um item transfira a posse para qualquer outro usuário cadastrado (`/items/{item_id}/transfer/{new_owner_id}`). | Usuário Autenticado |
+| RF008 | Excluir Usuário | A exclusão de um Usuário Autenticado deve, automaticamente, excluir **todos** os itens de conteúdo que pertenciam a ele (Deleção em Cascata). | Usuário Autenticado |
+
+### 3.2. Requisitos da Interface (Frontend e Experiência do Usuário)
+
+| ID | Nome do Requisito | Descrição | Ator Principal |
+| :--- | :--- | :--- | :--- |
+| **RF009** | Interface Kanban | O sistema deve apresentar o quadro principal no formato Kanban, organizando os cartões em colunas distintas baseadas no campo `status` (`A Fazer`, `Em Andamento`, `Concluído`). | Usuário Autenticado |
+| **RF010** | Arrastar e Soltar (D&D) | O usuário deve poder arrastar e soltar cartões entre as colunas, o que deve atualizar de forma assíncrona o campo `status` no backend. | Usuário Autenticado |
+| **RF011** | Modais de Interação | A interface deve utilizar modais para a criação e edição de cartões, exibindo claramente a opção de **Transferir Posse** apenas quando o usuário logado for o dono do item. | Usuário Autenticado |
+| **RF012** | Redirecionamento de Sessão | Caso a sessão do usuário expire (`401 Unauthorized`), o sistema deve redirecioná-lo automaticamente para a tela de Login (Tratamento de erro via Interceptor Axios). | Sistema |
 
 ## 4. Requisitos Não Funcionais (RNF)
 
-| ID     | Nome do Requisito | Descrição                                                                                                  |
-| :----- | :---------------- | :--------------------------------------------------------------------------------------------------------- |
-| RNF001 | Usabilidade       | A interface de gerenciamento para o Administrador deve ser intuitiva.                                        |
-| RNF002 | Desempenho        | A API deve ser capaz de retornar uma lista de 100 itens em menos de 500ms.                                   |
-| RNF003 | Flexibilidade     | O modelo de dados deve ser genérico o suficiente para suportar diferentes tipos de conteúdo sem alterações na arquitetura base. |
-| RNF004 | Segurança         | O acesso às rotas de criação, edição e exclusão deve ser protegido (funcionalidade futura de autenticação).   |
+| ID | Nome do Requisito | Descrição | Status de Implementação |
+| :--- | :--- | :--- | :--- |
+| **RNF001** | Usabilidade | A interface deve ser **responsiva** e intuitiva, com um *Design System* consistente (Chakra UI) para facilitar a interação com os cartões e formulários. | IMPLEMENTADO |
+| **RNF002** | Segurança (Autenticação) | O sistema deve usar **JSON Web Tokens (JWT)** para proteger todas as rotas de escrita e de usuário, garantindo o controle de acesso de forma *stateless*. | IMPLEMENTADO |
+| **RNF003** | Desempenho (API) | A API deve ser capaz de retornar a listagem de cartões rapidamente, visando um tempo de resposta inferior a 500ms para requisições de leitura. | IMPLEMENTADO |
+| **RNF004** | Manutenibilidade | A arquitetura deve ser modular, com separação clara entre Backend (FastAPI) e Frontend (React) e uso de padrões de projeto (ORM/Pydantic) para facilitar a manutenção e o *debugging*. | IMPLEMENTADO |
