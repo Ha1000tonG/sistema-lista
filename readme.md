@@ -93,5 +93,5 @@ A API fornece os seguintes endpoints genéricos para o gerenciamento de itens de
 | PUT    | `/items/{item_id}`    | Atualiza um item. Apenas o dono pode atualizar.       | PROTEGIDO |
 | PATCH  | `/items/{item_id}/transfer/{new_owner_id}`| Transfere a posse do item para outro usuário. | PROTEGIDO |
 | DELETE | `/items/{item_id}`    | Exclui um item. Apenas o dono pode excluir.           | PROTEGIDO |
-
-| DELETE | `/debug/reset-db`    | Limpa o banco de dados e o popula com dados de demonstração (usuário "AdminDemo" e 3 cartões).| PÚBLICO (Utility) |
+| DELETE | `/debug/reset-db`     | Limpa o banco de dados e o popula com dados de demonstração (usuário "AdminDemo" e 3 cartões).| PÚBLICO (Utility) |
+| GET    | `/users/all/`         | Lista todos os usuários cadastrados no sistema (utilizado para a funcionalidade de Transferência de Posse). | PROTEGIDO |

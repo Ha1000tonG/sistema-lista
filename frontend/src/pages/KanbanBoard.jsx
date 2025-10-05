@@ -233,12 +233,14 @@ function KanbanBoard() {
     const ITEM_TYPE = "kanban_card";
 
     const fetchAllUsers = async () => {
-        // EM PROJETO REAL: apiClient.get('/users/')
-        // Para simular o sucesso e ter a lista:
-        setAllUsers([
-            { id: 1, username: "Admin" },
-            { id: 2, username: "Teste" },
-        ]);
+        try {
+            // Chama o novo endpoint criado no backend
+            const response = await apiClient.get("/users/all/");
+            setAllUsers(response.data); // O estado agora armazena a lista real
+        } catch (error) {
+            console.error("Erro ao buscar a lista de usuários:", error);
+            // Em caso de falha na busca (por exemplo, token expirado), o toast de erro é gerado.
+        }
     };
 
     const handleDeleteUser = async () => {

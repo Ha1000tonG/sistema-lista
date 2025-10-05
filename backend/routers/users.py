@@ -2,10 +2,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from .. import database, schemas, models, auth
+from typing import List
 
 router = APIRouter(prefix="/users", tags=['Users'])
 
-
+# Rota para criar um novo usuário
 @router.post("/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     # --- LÓGICA DE VERIFICAÇÃO ADICIONADA ---
@@ -14,8 +15,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)
     if db_user_check:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Username já registrado")
-    # ----------------------------------------
-
     hashed_password = auth.get_password_hash(user.password)
     db_user = models.User(username=user.username,
                           hashed_password=hashed_password)
@@ -28,6 +27,18 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)
 @router.get("/me/", response_model=schemas.User)
 def read_users_me(current_user: schemas.User = Depends(auth.get_current_user)):
     return current_user
+
+
+@router.get("/all/", response_model=List[schemas.User])
+def list_all_users(db: Session = Depends(database.get_db),
+                   current_user: schemas.User = Depends(auth.get_current_user)):
+    """
+    Retorna a lista de todos os usuários cadastrados.
+    Utilizado pelo frontend para popular o dropdown de transferência de posse.
+    """
+    # Note: Não usamos 'skip' e 'limit' aqui para simplificar a demonstração
+    users = db.query(models.User).all()
+    return users
 
 # --- NOVA ROTA DE EXCLUSÃO DE USUÁRIO ---
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)

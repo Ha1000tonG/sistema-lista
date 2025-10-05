@@ -35,6 +35,8 @@ rectangle "Quadro Kanban Compartilhado" {
   usecase "Mover Cartão (Drag & Drop)" as UC_MOVE
   usecase "Transferir Posse do Cartão" as UC_TRANSFER
   usecase "Resetar Base de Demonstração" as UC_RESET
+  usecase "Buscar Usuários para Posse" as UC_LIST_USERS_TRANSFER
+
 }
 
 ' ------------------------------------------------------------------
@@ -53,5 +55,6 @@ AuthUser --> UC_DELETE
 AuthUser --> UC_MOVE
 AuthUser --> UC_TRANSFER
 AuthUser --> UC_RESET
+AuthUser --> UC_LIST_USERS_TRANSFER
 
 @enduml

@@ -29,6 +29,7 @@ Os requisitos estão separados por escopo (Sistema/API e Interface/UX).
 | RF006 | Visualizar um Conteúdo | O sistema deve permitir a visualização dos detalhes completos de um item de conteúdo específico. | Usuário Autenticado |
 | RF007 | Transferência de Posse | O sistema deve permitir que o **dono atual** de um item transfira a posse para qualquer outro usuário cadastrado (`/items/{item_id}/transfer/{new_owner_id}`). | Usuário Autenticado |
 | RF008 | Excluir Usuário | A exclusão de um Usuário Autenticado deve, automaticamente, excluir **todos** os itens de conteúdo que pertenciam a ele (Deleção em Cascata). | Usuário Autenticado |
+| RF008 | Listar Todos Usuários (Backend) | O sistema deve fornecer um endpoint protegido (/users/all/) que lista todos os usuários cadastrados, para ser consumido pelo modal de Transferência de Posse. | Usuário Autenticado |
 
 ### 3.2. Requisitos da Interface (Frontend e Experiência do Usuário)
 
