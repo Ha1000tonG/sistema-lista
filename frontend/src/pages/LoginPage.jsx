@@ -17,6 +17,10 @@ import {
 } from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
+// Variáveis de login de demonstração (devem ser as mesmas do backend/seeder.py)
+const ADMIN_USERNAME = "AdminDemo";
+const ADMIN_PASSWORD = "Password123";
+
 function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -70,6 +74,34 @@ function LoginPage() {
         }
     };
 
+    // --- LÓGICA DO BOTÃO RESET ---
+    const handleDemoReset = async () => {
+        try {
+            // Chama a rota DELETE /debug/reset-db que criamos no backend
+            await apiClient.delete("/debug/reset-db");
+
+            toast({
+                title: "Base de Dados Restaurada!",
+                description: `Use o login: Usuário: ${ADMIN_USERNAME} | Senha: ${ADMIN_PASSWORD}`,
+                status: "info",
+                duration: 9000,
+                isClosable: true,
+            });
+            // Opcional: Limpar o formulário e o token antigo
+            localStorage.removeItem("access_token");
+            setUsername("");
+            setPassword("");
+        } catch (error) {
+            console.error("Erro ao resetar DB:", error);
+            toast({
+                title: "Erro ao resetar a base.",
+                description: "Verifique se o servidor backend está rodando.",
+                status: "error",
+            });
+        }
+    };
+    // ----------------------------
+
     return (
         <Container centerContent>
             <Box
@@ -114,6 +146,20 @@ function LoginPage() {
                     </ChakraLink>
                 </Text>
             </Box>
+
+            {/* --- BOTÃO DE RESET DEMO --- */}
+            <Text mt={4} textAlign="center" fontSize="sm" color="gray.500">
+                Ao resetar você terá todos os dados apagados do quadro kanban e o usuário de demonstração recriado. Use o botão abaixo:
+            </Text>
+            <Button
+                onClick={handleDemoReset}
+                colorScheme="orange"
+                variant="outline"
+                size="sm"
+                mt={1}
+            >
+                Restaurar Base de Demonstração
+            </Button>
         </Container>
     );
 }

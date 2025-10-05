@@ -47,3 +47,4 @@ Os requisitos estão separados por escopo (Sistema/API e Interface/UX).
 | **RNF002** | Segurança (Autenticação) | O sistema deve usar **JSON Web Tokens (JWT)** para proteger todas as rotas de escrita e de usuário, garantindo o controle de acesso de forma *stateless*. | IMPLEMENTADO |
 | **RNF003** | Desempenho (API) | A API deve ser capaz de retornar a listagem de cartões rapidamente, visando um tempo de resposta inferior a 500ms para requisições de leitura. | IMPLEMENTADO |
 | **RNF004** | Manutenibilidade | A arquitetura deve ser modular, com separação clara entre Backend (FastAPI) e Frontend (React) e uso de padrões de projeto (ORM/Pydantic) para facilitar a manutenção e o *debugging*. | IMPLEMENTADO |
+| **RNF005** | Demonstração e Reset | O sistema deve incluir uma rota protegida (/debug/reset-db) que limpa o banco de dados e o popula com dados iniciais de demonstração (seeding), garantindo um ambiente limpo para testes. | IMPLEMENTADO |
