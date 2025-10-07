@@ -390,61 +390,65 @@ function KanbanBoard() {
         }));
     };
 
+    //  --- LÓGICA DE ATUALIZAÇÃO REFEITA PARA INCLUIR TRANSFERÊNCIA DE PROPRIEDADE ---
     const handleUpdateTask = async (event) => {
-        event.preventDefault();
-        try {
-            const {
-                id,
-                owner,
-                created_at,
-                updated_at,
-                new_owner_id,
-                ...dataToUpdate
-            } = editingTask;
+    event.preventDefault();
+    try {
+        // 1. Criamos uma cópia do objeto de edição para não modificar o estado original.
+        const dataToUpdate = { ...editingTask };
 
-            // VERIFICA SE HÁ UMA TENTATIVA DE TRANSFERÊNCIA DE POSSE
-            const newOwnerId = new_owner_id || owner.id;
-            const isTransfer = newOwnerId !== owner.id;
+        // 2. Deletamos manualmente as propriedades que a API não espera receber no corpo da requisição PUT.
+        delete dataToUpdate.id;
+        delete dataToUpdate.owner;
+        delete dataToUpdate.created_at;
+        delete dataToUpdate.updated_at;
 
-            let response;
+        // A propriedade 'new_owner_id' é usada na lógica abaixo, então não a deletamos ainda.
 
-            if (isTransfer) {
-                // USA A ROTA PATCH DE TRANSFERÊNCIA CRIADA NO BACKEND
-                response = await apiClient.patch(
-                    `/items/${id}/transfer/${newOwnerId}`
-                );
-                toast({
-                    title: `Tarefa transferida para ${response.data.owner.username}!`,
-                    status: "info",
-                });
-            } else {
-                // USA A ROTA PUT GENÉRICA para atualizar Título, Tags, etc.
-                response = await apiClient.put(`/items/${id}`, dataToUpdate);
-                toast({
-                    title: "Tarefa atualizada com sucesso!",
-                    status: "success",
-                });
-            }
+        // 3. A lógica de verificação de transferência continua a mesma.
+        const isTransfer = dataToUpdate.new_owner_id && dataToUpdate.new_owner_id !== editingTask.owner.id;
 
-            fetchTasks();
-            onEditClose();
-        } catch (error) {
-            if (error.response && error.response.status === 403) {
-                toast({
-                    title: "Acesso Negado",
-                    description:
-                        "Apenas o autor do cartão pode editar/transferir este item.",
-                    status: "error",
-                });
-            } else if (error.response?.status !== 401) {
-                console.error("Erro ao atualizar tarefa:", error);
-                toast({
-                    title: "Erro ao atualizar a tarefa.",
-                    status: "error",
-                });
-            }
+        let response;
+
+        if (isTransfer) {
+            // Se for transferência, chamamos o endpoint PATCH
+            response = await apiClient.patch(
+                `/items/${editingTask.id}/transfer/${dataToUpdate.new_owner_id}`
+            );
+            toast({
+                title: `Tarefa transferida para ${response.data.owner.username}!`,
+                status: "info",
+            });
+        } else {
+            // Se for uma edição normal, removemos o 'new_owner_id' antes de enviar
+            delete dataToUpdate.new_owner_id;
+            // E chamamos o endpoint PUT com o objeto limpo
+            response = await apiClient.put(`/items/${editingTask.id}`, dataToUpdate);
+            toast({
+                title: "Tarefa atualizada com sucesso!",
+                status: "success",
+            });
         }
-    };
+
+        fetchTasks();
+        onEditClose();
+    } catch (error) {
+        if (error.response && error.response.status === 403) {
+            toast({
+                title: "Acesso Negado",
+                description:
+                    "Apenas o autor do cartão pode editar/transferir este item.",
+                status: "error",
+            });
+        } else if (error.response?.status !== 401) {
+            console.error("Erro ao atualizar tarefa:", error);
+            toast({
+                title: "Erro ao atualizar a tarefa.",
+                status: "error",
+            });
+        }
+    }
+};
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
