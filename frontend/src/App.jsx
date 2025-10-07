@@ -1,6 +1,5 @@
 // frontend/src/App.jsx lida com rotas e proteção de rotas
 
-// Importa as bibliotecas e componentes necessários.
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
