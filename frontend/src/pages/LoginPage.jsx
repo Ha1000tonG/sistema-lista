@@ -18,9 +18,10 @@ import {
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 // Variáveis de login de demonstração (devem ser as mesmas do backend/seeder.py)
-const ADMIN_USERNAME = "AdminDemo";
-const ADMIN_PASSWORD = "Password123";
+const ADMIN_USERNAME = "Admin";
+const ADMIN_PASSWORD = "123";
 
+// Lógica da página de login do administrador 
 function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");

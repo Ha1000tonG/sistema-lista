@@ -71,6 +71,6 @@ def reset_database(db: Session = Depends(database.get_db)):
     # Retorna a mensagem e a credencial do novo usuário admin
     return {
         "message": "Banco de dados resetado e populado com sucesso!",
-        "login": f"Usuário: {admin_user.username} | Senha: Password123"
-        # NOTA: A senha 'Password  Password123' deve estar definida no seeder.py
+        "login": f"Usuário: {admin_user.username} | Senha: 123"
+        # NOTA: A senha '123' deve estar definida no seeder.py
     }

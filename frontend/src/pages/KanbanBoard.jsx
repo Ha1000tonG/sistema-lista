@@ -49,6 +49,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import { useNavigate } from "react-router-dom";
+
 const statusColorMap = {
     "A Fazer": "gray",
     "Em Andamento": "blue",
@@ -209,6 +211,7 @@ const Column = ({ title, tasks, onDelete, onEdit }) => {
 };
 
 function KanbanBoard() {
+    const navigate = useNavigate(); // <<< ADICIONE ESTA LINHA
     const [tasks, setTasks] = useState([]);
     const [activeTask, setActiveTask] = useState(null);
     const {
@@ -274,7 +277,8 @@ function KanbanBoard() {
 
     const handleLogout = () => {
         localStorage.removeItem("access_token");
-        window.location.href = "/login";
+        //window.location.href = "/login";
+        navigate("/login"); // <<< USE ESTA LINHA
     };
 
     // --- LÓGICA DE CARREGAMENTO (useEffect) COMPLETAMENTE REFEITA ---

@@ -6,8 +6,8 @@ from sqlalchemy import text
 
 # 1. Dados iniciais para popular o banco de dados
 # Dados do usuário inicial
-ADMIN_USERNAME = "AdminDemo"
-ADMIN_PASSWORD = "Password123"
+ADMIN_USERNAME = "Admin"
+ADMIN_PASSWORD = "123"
 
 # Dados dos cartões de demonstração
 DEMO_CARDS = [
