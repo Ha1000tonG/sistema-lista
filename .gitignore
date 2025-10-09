@@ -28,3 +28,8 @@
 # Arquivos de log e sistema operacional geral
 *.log
 .DS_Store
+
+esquema_banco.drawio
+MELHORIAS_PRODUCAO.md
+mgs_recrutador.txt
+Linkedin.txt
